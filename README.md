@@ -1,36 +1,183 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Collaborative Knowledge Board
 
-## Getting Started
+A production-grade SaaS-style workspace for managing ideas, documentation, and execution. Built with **Next.js 14+ (App Router)**, **TypeScript**, and **Tailwind CSS**. Stage 1 deliverable: core board system with normalized state, accessible UI, and no UI/drag-and-drop libraries.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 1. Folder structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── layout.tsx          # Root layout, fonts, StoreHydration wrapper
+│   ├── page.tsx            # Workspace dashboard (board list)
+│   ├── board/[boardId]/
+│   │   └── page.tsx        # Board view route — lazy-loaded via dynamic()
+│   └── globals.css         # Tailwind base and theme variables
+├── components/
+│   ├── ui/                 # Presentational atoms (no feature logic)
+│   │   ├── Button.tsx
+│   │   ├── Modal.tsx       # Accessible modal: focus trap, Esc, scroll lock
+│   │   ├── Badge.tsx
+│   │   └── Input.tsx
+│   ├── board/              # Board feature
+│   │   ├── BoardCard.tsx
+│   │   ├── BoardList.tsx
+│   │   ├── BoardView.tsx
+│   │   ├── BoardViewSkeleton.tsx  # Shown while board chunk loads
+│   │   └── CreateBoardModal.tsx
+│   ├── column/             # Column + card feature
+│   │   ├── Column.tsx
+│   │   ├── ColumnList.tsx
+│   │   ├── KanbanCard.tsx
+│   │   └── CardDetailModal.tsx
+│   └── StoreHydration.tsx  # Rehydrates persisted stores before rendering
+├── store/                  # Zustand (domain + UI state)
+│   ├── boardStore.ts
+│   ├── columnStore.ts
+│   ├── cardStore.ts
+│   └── uiStore.ts
+├── types/
+│   └── index.ts            # Board, Column, Card, UIState
+├── lib/
+│   ├── date.ts             # formatDisplayDate, getDueStatus
+│   └── markdown.tsx        # MarkdownRenderer (react-markdown + remark-gfm)
+└── hooks/
+    ├── useBoard.ts         # Resolves board + columnsWithCards for a boardId
+    └── useCardForm.ts      # Card form state, resets when card id changes
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **app**: Routes and layout only; page components stay thin and delegate to feature components.
+- **components/ui**: Reusable primitives; no direct store imports.
+- **components/board** and **components/column**: Feature-scoped; may use stores and hooks.
+- **store**: Single source of truth; normalized entities + ordered id arrays.
+- **lib**: Pure helpers (dates, markdown config).
+- **hooks**: Encapsulate store selection and form state.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 2. State architecture diagram
 
-## Learn More
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                     COMPONENTS                          │
+                    └─────────────────────────────────────────────────────────┘
+                      │                │                │                │
+                      ▼                ▼                ▼                ▼
+              ┌───────────┐    ┌───────────┐    ┌───────────┐    ┌───────────┐
+              │ Dashboard │    │ BoardView │    │ ColumnList│    │ CardDetail│
+              │  (page)   │    │           │    │  Column   │    │  Modal   │
+              └─────┬─────┘    └─────┬─────┘    └─────┬─────┘    └─────┬─────┘
+                    │                │                │                │
+    ┌───────────────┼────────────────┼────────────────┼────────────────┼───────────────┐
+    │               │                │                │                │               │
+    ▼               ▼                ▼                ▼                ▼               ▼
+┌────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────┐
+│boardStore│   │columnStore │   │ cardStore  │   │ columnStore│   │ cardStore  │   │uiStore │
+│         │   │            │   │            │   │            │   │            │   │        │
+│boards   │   │columns     │   │cards       │   │columnIds   │   │cards       │   │active  │
+│boardIds │   │columnIds   │   │cardIds     │   │[boardId]   │   │cardIds     │   │BoardId │
+└────────┘   └────────────┘   └────────────┘   └────────────┘   └────────────┘   └────────┘
+     │               │                │
+     │               │                │
+     └───────────────┴────────────────┴──────► Normalized: Record<id, Entity> + id[] arrays
+                                               Cascade: deleteBoard → removeColumnsByBoard
+                                                        → removeCardsByColumns
+```
 
-To learn more about Next.js, take a look at the following resources:
+**Data flow (subscriptions):**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Dashboard**: `useBoardStore(state => state.boardIds.length)`, `boardIds`, `boards` → BoardList, BoardCard.
+- **BoardView**: `useBoard(boardId)` → `useBoardStore`, `useColumnStore`, `useCardStore` (via hook); `useUIStore(activeBoardId)`.
+- **Column**: `column` + `cards` from parent; `useColumnStore` / `useCardStore` for mutations.
+- **CardDetailModal**: `useCardForm(card)` (local form); `useCardStore(updateCard, deleteCard)` on Save/Delete.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Stores are **persisted** (Zustand `persist` with `skipHydration: true`) and rehydrated in `StoreHydration` before rendering to avoid hydration mismatch.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 3. State management decision
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Why Zustand**
+
+- **Minimal API**: No providers; components subscribe with `useStore(selector)`. Selectors keep re-renders scoped to the slice that changed.
+- **Normalized shape**: Entities live as `Record<id, Entity>` with separate ordered id arrays (`boardIds`, `columnIds[boardId]`, `cardIds[columnId]`). No deep nesting; O(1) lookups and straightforward updates.
+- **Stage 2 real-time ready**: A WebSocket can apply delta patches by id (e.g. `set(state => ({ boards: { ...state.boards, [id]: updated } }))` or append to `cardIds[columnId]` and set `cards[newId]`). No need to replace entire trees.
+- **Persistence**: `persist` middleware with `partialize` and `skipHydration: true` gives optional localStorage without blocking first paint; hydration runs in a client-only wrapper.
+
+**Alternatives considered**
+
+- **Context + useReducer**: Would require a single large reducer or multiple contexts; either deep prop drilling or many providers. Harder to subscribe to narrow slices and avoid unnecessary re-renders.
+- **Redux**: Heavier; normalized state is similar but boilerplate and devtools are more than needed for this scope.
+
+---
+
+## 4. Performance strategy
+
+- **Code splitting**: The **board view** is lazy-loaded via `next/dynamic` in `app/board/[boardId]/page.tsx`. `BoardView` and its subtree load in a separate chunk; a `BoardViewSkeleton` (Tailwind `animate-pulse`) is shown until the chunk is ready. `ssr: false` keeps the board view client-only and avoids loading its bundle on initial server render.
+- **Memoization**: List items that receive stable props are wrapped in `React.memo`: `BoardCard`, `KanbanCard`, `Column`. So updates to one board/card/column do not re-render siblings.
+- **Stable callbacks**: In `BoardView`, `handleOpenCardDetail` and `handleCloseCardModal` are created with `useCallback` (empty deps where possible) so that memoized children do not re-render when the parent re-runs.
+- **Selectors**: Components use granular Zustand selectors (e.g. `state.boardIds.length`, `state.boards[id]`) instead of subscribing to the whole store, so only the selected slice triggers re-renders when it changes.
+
+---
+
+## 5. Accessibility implementation
+
+- **Semantic HTML**: `<main>`, `<header>`, `<section>`, `<article>`, `<ul>`/`<li>` for lists; interactive controls use `<button>` or `<a>` (no `<div onClick>`). Form fields use `<label>` and `htmlFor`.
+- **Modals**: `role="dialog"`, `aria-modal="true"`, `aria-labelledby` to the modal title. Focus moves to the first focusable element on open and is restored on close. Tab/Shift+Tab are trapped inside the dialog. Escape closes. Body scroll is locked while open.
+- **Keyboard**: Column title inline edit (Enter/Space to activate, Enter to save, Esc to cancel). Card/column creation: Enter to submit, Esc to cancel. Confirmation dialogs: Enter to confirm, Esc to cancel.
+- **ARIA**: Icon-only buttons have `aria-label` (e.g. "Delete board", "Remove tag"). Invalid fields use `aria-invalid` and `aria-describedby` pointing to the error message. Delete confirmation uses `role="alertdialog"` with `aria-labelledby` and `aria-describedby`.
+- **Focus**: Visible focus rings (Tailwind `focus-visible:ring-*`); no `outline: none` without a replacement.
+
+---
+
+## 6. Key engineering decisions
+
+- **Board route code-split**: The board page is the heaviest route (columns, cards, modals, markdown). Lazy-loading it keeps the dashboard bundle smaller and satisfies the PRD requirement that the board view be code-split with a loading state.
+- **Persist with skipHydration**: Persistence is done with Zustand `persist` and `skipHydration: true`. State is rehydrated in `StoreHydration` after mount so the first client render matches server output (no state on server), then persisted state is applied. This avoids hydration mismatches while still giving optional localStorage.
+- **Card modal instead of route**: Opening a card opens a modal rather than navigating to `/board/[boardId]/card/[cardId]`. This preserves column context and scroll position and avoids a full navigation for a quick edit. (Query param `?card=id` for shareability was left for a later iteration.)
+- **Cascade delete in UI**: When deleting a board, the client calls `removeColumnsByBoard(boardId)`, then `removeCardsByColumns(columnIds)`, then `deleteBoard(id)`. All three stores stay in sync; the same pattern is used for column delete (remove cards for that column, then delete column).
+
+---
+
+## 7. Getting started
+
+**Install and run**
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). You’ll see the workspace dashboard; create a board, open it, add columns and cards, and open a card to edit (markdown, tags, due date).
+
+**Build**
+
+```bash
+npm run build
+npm run start
+```
+
+---
+
+## 8. Deploy on Vercel
+
+1. Push the project to **GitHub** (or GitLab/Bitbucket).
+2. Go to [vercel.com](https://vercel.com) and sign in with the same Git provider.
+3. Click **Add New… → Project** and import the repository.
+4. Leave **Framework Preset** as **Next.js**; **Root Directory** as `.` (or the repo root).
+5. Click **Deploy**. Vercel will run `npm run build` and deploy. No extra env vars are required for the current app.
+6. After deploy, use the generated URL (e.g. `https://your-project.vercel.app`). Optionally add a custom domain under **Settings → Domains**.
+
+**CLI (optional)**
+
+```bash
+npm i -g vercel
+vercel
+```
+
+Follow the prompts (link to existing project or create new). Use `vercel --prod` to deploy to the production URL.
+
+---
+
+**Stack:** Next.js 16 (App Router) · TypeScript (strict) · Tailwind CSS · Zustand · react-markdown + remark-gfm · date-fns · nanoid · lucide-react

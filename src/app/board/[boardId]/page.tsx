@@ -1,5 +1,17 @@
 import type { Metadata } from "next";
-import { BoardView } from "@/components/board/BoardView";
+import dynamic from "next/dynamic";
+import { BoardViewSkeleton } from "@/components/board/BoardViewSkeleton";
+
+const BoardView = dynamic(
+  () =>
+    import("@/components/board/BoardView").then((mod) => ({
+      default: mod.BoardView,
+    })),
+  {
+    loading: () => <BoardViewSkeleton />,
+    ssr: false,
+  },
+);
 
 interface BoardPageProps {
   params: Promise<{ boardId: string }>;
@@ -10,7 +22,7 @@ export async function generateMetadata({
 }: BoardPageProps): Promise<Metadata> {
   const { boardId } = await params;
   return {
-    title: `Board ${boardId} | Collaborative Knowledge Board`,
+    title: `Board | Collaborative Knowledge Board`,
   };
 }
 
