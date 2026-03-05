@@ -1,0 +1,252 @@
+import { useRef, useEffect, useState } from "react";
+import type { Card } from "@/types";
+import { Modal } from "@/components/ui/Modal";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { MarkdownRenderer } from "@/lib/markdown";
+import { useCardForm } from "@/hooks/useCardForm";
+import { useCardStore } from "@/store/cardStore";
+import { X } from "lucide-react";
+
+const MAX_TAGS = 10;
+const MAX_TAG_LENGTH = 24;
+const titleId = "card-detail-title";
+const titleErrorId = "card-detail-title-error";
+
+interface CardDetailModalProps {
+  open: boolean;
+  card: Card | null;
+  onClose: () => void;
+}
+
+export function CardDetailModal({
+  open,
+  card,
+  onClose,
+}: CardDetailModalProps) {
+  const { state, setState } = useCardForm(card);
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [tagInput, setTagInput] = useState("");
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  const updateCard = useCardStore((s) => s.updateCard);
+  const deleteCard = useCardStore((s) => s.deleteCard);
+
+  useEffect(() => {
+    if (open && titleInputRef.current) {
+      titleInputRef.current.focus();
+    }
+  }, [open]);
+
+  if (!card) return null;
+
+  function addTag(tag: string) {
+    const trimmed = tag.trim().slice(0, MAX_TAG_LENGTH);
+    if (!trimmed) return;
+    setState((prev) => {
+      if (prev.tags.length >= MAX_TAGS) return prev;
+      if (prev.tags.includes(trimmed)) return prev;
+      return { ...prev, tags: [...prev.tags, trimmed] };
+    });
+    setTagInput("");
+  }
+
+  function removeTag(index: number) {
+    setState((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((_, i) => i !== index),
+    }));
+  }
+
+  function handleTagKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter" || event.key === ",") {
+      event.preventDefault();
+      addTag(tagInput);
+    }
+  }
+
+  function handleSave() {
+    if (!card) return;
+    const trimmed = state.title.trim();
+    if (!trimmed) {
+      setTitleError("Title is required");
+      return;
+    }
+    setTitleError(null);
+    updateCard(card.id, {
+      title: trimmed,
+      description: state.description,
+      tags: state.tags,
+      dueDate: state.dueDate || null,
+    });
+    onClose();
+  }
+
+  function handleDeleteConfirm() {
+    if (!card) return;
+    deleteCard(card.id);
+    setDeleteConfirmOpen(false);
+    onClose();
+  }
+
+  const dueDateValue =
+    state.dueDate != null
+      ? state.dueDate.slice(0, 10)
+      : "";
+
+  return (
+    <Modal open={open} onClose={onClose} titleId={titleId}>
+      <div className="space-y-4">
+        <header className="space-y-1">
+          <Input
+            ref={titleInputRef}
+            id={titleId}
+            value={state.title}
+            maxLength={120}
+            onChange={(e) => {
+              setState((prev) => ({ ...prev, title: e.target.value }));
+              if (titleError) setTitleError(null);
+            }}
+            aria-invalid={Boolean(titleError)}
+            aria-describedby={titleError ? titleErrorId : undefined}
+          />
+          {titleError && (
+            <p id={titleErrorId} className="text-xs text-red-400" role="alert">
+              {titleError}
+            </p>
+          )}
+        </header>
+
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="space-y-2">
+            <label
+              className="block text-xs font-medium text-muted-foreground"
+              htmlFor="card-description"
+            >
+              Description (markdown)
+            </label>
+            <textarea
+              id="card-description"
+              className="min-h-[140px] w-full rounded-md border border-border bg-slate-900/60 p-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              value={state.description}
+              onChange={(e) =>
+                setState((prev) => ({ ...prev, description: e.target.value }))
+              }
+            />
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground">
+              Preview
+            </p>
+            <div className="min-h-[140px] rounded-md border border-border bg-slate-950/70 p-3 text-sm">
+              <MarkdownRenderer value={state.description} />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label
+            className="block text-xs font-medium text-muted-foreground"
+            htmlFor="card-tags"
+          >
+            Tags (Enter or comma to add, max {MAX_TAGS}, 24 chars each)
+          </label>
+          <Input
+            id="card-tags"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={handleTagKeyDown}
+            placeholder="Add tag"
+            disabled={state.tags.length >= MAX_TAGS}
+          />
+          {state.tags.length > 0 && (
+            <ul className="flex flex-wrap gap-1" role="list">
+              {state.tags.map((tag, i) => (
+                <li key={`${tag}-${i}`} className="inline-flex items-center gap-1">
+                  <Badge>{tag}</Badge>
+                  <button
+                    type="button"
+                    className="inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:bg-slate-700 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                    aria-label={`Remove tag ${tag}`}
+                    onClick={() => removeTag(i)}
+                  >
+                    <X className="h-3 w-3" aria-hidden />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <label
+            className="block text-xs font-medium text-muted-foreground"
+            htmlFor="card-due-date"
+          >
+            Due date
+          </label>
+          <input
+            id="card-due-date"
+            type="date"
+            className="h-10 w-full rounded-md border border-border bg-slate-900/60 px-3 text-sm text-foreground outline-none focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            value={dueDateValue}
+            onChange={(e) =>
+              setState((prev) => ({
+                ...prev,
+                dueDate: e.target.value ? e.target.value : null,
+              }))
+            }
+          />
+        </div>
+
+        {!deleteConfirmOpen ? (
+          <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={onClose}>
+              Close
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => setDeleteConfirmOpen(true)}
+              aria-label="Delete card"
+            >
+              Delete card
+            </Button>
+            <Button type="button" onClick={handleSave}>
+              Save
+            </Button>
+          </div>
+        ) : (
+          <div className="rounded-md border border-border bg-slate-900/40 p-4" role="alertdialog" aria-labelledby="delete-card-heading" aria-describedby="delete-card-desc">
+            <h3 id="delete-card-heading" className="text-sm font-semibold">
+              Delete this card?
+            </h3>
+            <p id="delete-card-desc" className="mt-1 text-xs text-muted-foreground">
+              This action cannot be undone.
+            </p>
+            <div className="mt-3 flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setDeleteConfirmOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                aria-label="Confirm delete card"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
