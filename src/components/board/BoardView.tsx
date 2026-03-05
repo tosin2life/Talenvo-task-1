@@ -16,7 +16,7 @@ interface BoardViewProps {
 
 export function BoardView({ boardId }: BoardViewProps) {
   const setActiveBoardId = useUIStore((state) => state.setActiveBoardId);
-  const { board, columnsWithCards } = useBoard(boardId);
+  const { board } = useBoard(boardId);
 
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [columnError, setColumnError] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export function BoardView({ boardId }: BoardViewProps) {
   const [cardModalOpen, setCardModalOpen] = useState(false);
   const cardsById = useCardStore((state) => state.cards);
   const selectedCard =
-    selectedCardId != null ? cardsById[selectedCardId] ?? null : null;
+    selectedCardId != null ? (cardsById[selectedCardId] ?? null) : null;
 
   useEffect(() => {
     setActiveBoardId(boardId);
@@ -127,4 +127,3 @@ export function BoardView({ boardId }: BoardViewProps) {
     </main>
   );
 }
-
