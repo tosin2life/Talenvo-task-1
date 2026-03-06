@@ -175,44 +175,59 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
         </div>
       </section>
 
-      <Modal
+      <DeleteColumnModal
         open={deleteOpen}
-        onClose={() => setDeleteOpen(false)}
-        titleId="delete-column-title"
-      >
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <h2
-              id="delete-column-title"
-              className="text-lg font-semibold tracking-tight"
-            >
-              Delete this column?
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              All cards in <span className="font-medium">{column.title}</span>{" "}
-              will be deleted. This action cannot be undone.
-            </p>
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setDeleteOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDeleteColumn}
-              aria-label="Confirm delete column"
-            >
-              Delete column
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        columnTitle={column.title}
+        onCancel={() => setDeleteOpen(false)}
+        onConfirm={handleDeleteColumn}
+      />
     </>
+  );
+}
+
+interface DeleteColumnModalProps {
+  open: boolean;
+  columnTitle: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}
+
+function DeleteColumnModal({
+  open,
+  columnTitle,
+  onCancel,
+  onConfirm,
+}: DeleteColumnModalProps) {
+  return (
+    <Modal open={open} onClose={onCancel} titleId="delete-column-title">
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <h2
+            id="delete-column-title"
+            className="text-lg font-semibold tracking-tight"
+          >
+            Delete this column?
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            All cards in <span className="font-medium">{columnTitle}</span> will
+            be deleted. This action cannot be undone.
+          </p>
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <Button type="button" variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={onConfirm}
+            aria-label="Confirm delete column"
+          >
+            Delete column
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
