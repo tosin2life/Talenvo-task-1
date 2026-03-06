@@ -112,7 +112,11 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
           </div>
         </header>
 
-        <ul className="flex flex-1 flex-col gap-2 list-none p-0 m-0" role="list" aria-label={`Cards in ${column.title}`}>
+        <ul
+          className="flex flex-1 flex-col gap-2 list-none p-0 m-0"
+          role="list"
+          aria-label={`Cards in ${column.title}`}
+        >
           {cards.length === 0 ? (
             <li>
               <button
@@ -213,4 +217,3 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
 }
 
 export const Column = memo(ColumnInner);
-

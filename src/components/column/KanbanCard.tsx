@@ -47,5 +47,3 @@ function KanbanCardInner({ card }: KanbanCardProps) {
 }
 
 export const KanbanCard = memo(KanbanCardInner);
-
-

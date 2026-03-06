@@ -19,8 +19,9 @@ function BoardCardInner({ board }: BoardCardProps) {
   const deleteBoard = useBoardStore((state) => state.deleteBoard);
 
   function handleConfirmDelete() {
-    const removedColumnIds =
-      useColumnStore.getState().removeColumnsByBoard(board.id);
+    const removedColumnIds = useColumnStore
+      .getState()
+      .removeColumnsByBoard(board.id);
     useCardStore.getState().removeCardsByColumns(removedColumnIds);
     deleteBoard(board.id);
     setConfirmOpen(false);
@@ -74,8 +75,9 @@ function BoardCardInner({ board }: BoardCardProps) {
               Delete this board?
             </h2>
             <p className="text-sm text-muted-foreground">
-              All columns and cards on <span className="font-medium">{board.title}</span>{" "}
-              will be removed. This action cannot be undone.
+              All columns and cards on{" "}
+              <span className="font-medium">{board.title}</span> will be
+              removed. This action cannot be undone.
             </p>
           </div>
           <div className="flex justify-end gap-2 pt-2">
@@ -102,4 +104,3 @@ function BoardCardInner({ board }: BoardCardProps) {
 }
 
 export const BoardCard = memo(BoardCardInner);
-
