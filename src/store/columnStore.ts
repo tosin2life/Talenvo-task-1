@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { nanoid } from "nanoid";
 import type { Column } from "@/types";
 
 type ColumnState = {
@@ -46,7 +45,7 @@ export const useColumnStore = create<ColumnStore>()(
     }),
   createColumn: (boardId, title) => {
     const column: Column = {
-      id: nanoid(),
+      id: crypto.randomUUID(),
       boardId,
       title,
       order: Date.now(),

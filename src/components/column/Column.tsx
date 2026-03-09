@@ -48,9 +48,10 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
       setCardError("Card title is required");
       return;
     }
-    createCard(column.id, trimmed);
+    const newCard = createCard(column.id, trimmed);
     setNewCardTitle("");
     setCardError(null);
+    onOpenCardDetail?.(newCard.id);
   }
 
   function handleKeyDownTitle(event: React.KeyboardEvent<HTMLInputElement>) {

@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { nanoid } from "nanoid";
 import type { Board } from "@/types";
 
 type BoardState = {
@@ -42,7 +41,7 @@ export const useBoardStore = create<BoardStore>()(
         }),
       createBoard: ({ title, description }) => {
         const board: Board = {
-          id: nanoid(),
+          id: crypto.randomUUID(),
           title,
           description,
           createdAt: new Date().toISOString(),

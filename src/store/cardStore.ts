@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { nanoid } from "nanoid";
 import type { Card } from "@/types";
 
 type CardState = {
@@ -46,7 +45,7 @@ export const useCardStore = create<CardStore>()(
     }),
   createCard: (columnId, title) => {
     const card: Card = {
-      id: nanoid(),
+      id: crypto.randomUUID(),
       columnId,
       title,
       description: "",

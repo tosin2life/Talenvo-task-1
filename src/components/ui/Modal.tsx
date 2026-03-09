@@ -1,5 +1,4 @@
 import * as React from "react";
-import { clsx } from "clsx";
 
 const FOCUSABLE =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -93,10 +92,7 @@ export function Modal({
     >
       <div
         ref={contentRef}
-        className={clsx(
-          "max-h-[80vh] w-full max-w-xl overflow-y-auto rounded-lg border border-border bg-card p-6 shadow-xl",
-          className,
-        )}
+        className={`max-h-[80vh] w-full max-w-xl overflow-y-auto rounded-lg border border-border bg-card p-6 shadow-xl${className ? ` ${className}` : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

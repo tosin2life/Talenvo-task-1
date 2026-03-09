@@ -1,5 +1,4 @@
 import * as React from "react";
-import { clsx } from "clsx";
 
 type Variant = "primary" | "secondary" | "ghost" | "destructive";
 type Size = "sm" | "md";
@@ -35,12 +34,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         type={type}
-        className={clsx(
-          "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed",
-          variantClasses[variant],
-          sizeClasses[size],
-          className,
-        )}
+        className={`inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]}${className ? ` ${className}` : ""}`}
         {...props}
       />
     );

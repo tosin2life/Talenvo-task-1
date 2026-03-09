@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { ColumnList } from "@/components/column/ColumnList";
 import { useUIStore } from "@/store/uiStore";
 import { useBoard } from "@/hooks/useBoard";
@@ -60,7 +61,13 @@ export function BoardView({ boardId }: BoardViewProps) {
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8">
         <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
+          <div className="space-y-1">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-white/20"
+            >
+              &larr; Back to boards
+            </Link>
             <h1 className="text-2xl font-semibold tracking-tight">
               {board?.title ?? "Board"}
             </h1>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { StoreHydration } from "@/components/StoreHydration";
@@ -29,6 +30,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
+        <nav className="flex items-center gap-3 border-b border-white/10 bg-indigo-700 px-4 py-3">
+          <Link
+            href="/"
+            className="text-base font-bold tracking-tight text-white hover:text-blue-200 transition-colors"
+          >
+            Knowledge Board
+          </Link>
+        </nav>
         <StoreHydration>{children}</StoreHydration>
       </body>
     </html>
