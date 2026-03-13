@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Column } from "@/types";
+import { columnApi } from "@/api";
 
 type ColumnState = {
   columns: Record<string, Column>;
@@ -9,12 +10,12 @@ type ColumnState = {
 
 type ColumnActions = {
   setInitialColumns: (columns: Column[]) => void;
-  createColumn: (boardId: string, title: string) => Column;
+  createColumn: (boardId: string, title: string) => Promise<Column>;
   updateColumn: (
     id: string,
     changes: Pick<Partial<Column>, "title" | "order">,
-  ) => void;
-  deleteColumn: (id: string) => void;
+  ) => Promise<void>;
+  deleteColumn: (id: string) => Promise<void>;
   removeColumnsByBoard: (boardId: string) => string[];
 };
 
@@ -43,48 +44,28 @@ export const useColumnStore = create<ColumnStore>()(
         columnIds: idsByBoard,
       };
     }),
-  createColumn: (boardId, title) => {
-    const column: Column = {
-      id: crypto.randomUUID(),
-      boardId,
-      title,
-      order: Date.now(),
-    };
+  createColumn: async (boardId, title) => {
+    const column = await columnApi.createColumn(boardId, title);
 
     set((state) => {
       const existingIds = state.columnIds[boardId] ?? [];
       return {
-        columns: {
-          ...state.columns,
-          [column.id]: column,
-        },
-        columnIds: {
-          ...state.columnIds,
-          [boardId]: [...existingIds, column.id],
-        },
+        columns: { ...state.columns, [column.id]: column },
+        columnIds: { ...state.columnIds, [boardId]: [...existingIds, column.id] },
       };
     });
 
     return column;
   },
-  updateColumn: (id, changes) =>
+  updateColumn: async (id, changes) => {
+    const updated = await columnApi.updateColumn(id, changes);
     set((state) => {
-      const existing = state.columns[id];
-      if (!existing) return state;
-
-      const updated: Column = {
-        ...existing,
-        ...changes,
-      };
-
-      return {
-        columns: {
-          ...state.columns,
-          [id]: updated,
-        },
-      };
-    }),
-  deleteColumn: (id) =>
+      if (!state.columns[id]) return state;
+      return { columns: { ...state.columns, [id]: updated } };
+    });
+  },
+  deleteColumn: async (id) => {
+    await columnApi.deleteColumn(id);
     set((state) => {
       const existing = state.columns[id];
       if (!existing) return state;
@@ -99,7 +80,8 @@ export const useColumnStore = create<ColumnStore>()(
           [existing.boardId]: idsForBoard.filter((columnId) => columnId !== id),
         },
       };
-    }),
+    });
+  },
   removeColumnsByBoard: (boardId) => {
     let removedIds: string[] = [];
 

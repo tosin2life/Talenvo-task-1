@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Card } from "@/types";
+import { cardApi } from "@/api";
 
 type CardState = {
   cards: Record<string, Card>;
@@ -9,12 +10,18 @@ type CardState = {
 
 type CardActions = {
   setInitialCards: (cards: Card[]) => void;
-  createCard: (columnId: string, title: string) => Card;
+  createCard: (columnId: string, title: string) => Promise<Card>;
   updateCard: (
     id: string,
     changes: Pick<Partial<Card>, "title" | "description" | "tags" | "dueDate">,
-  ) => void;
-  deleteCard: (id: string) => void;
+  ) => Promise<void>;
+  deleteCard: (id: string) => Promise<void>;
+  moveCard: (
+    cardId: string,
+    fromColumnId: string,
+    toColumnId: string,
+    toIndex: number,
+  ) => Promise<void>;
   removeCardsByColumns: (columnIds: string[]) => void;
 };
 
@@ -43,51 +50,28 @@ export const useCardStore = create<CardStore>()(
         cardIds: idsByColumn,
       };
     }),
-  createCard: (columnId, title) => {
-    const card: Card = {
-      id: crypto.randomUUID(),
-      columnId,
-      title,
-      description: "",
-      tags: [],
-      dueDate: null,
-      createdAt: new Date().toISOString(),
-    };
+  createCard: async (columnId, title) => {
+    const card = await cardApi.createCard(columnId, title);
 
     set((state) => {
       const existingIds = state.cardIds[columnId] ?? [];
       return {
-        cards: {
-          ...state.cards,
-          [card.id]: card,
-        },
-        cardIds: {
-          ...state.cardIds,
-          [columnId]: [...existingIds, card.id],
-        },
+        cards: { ...state.cards, [card.id]: card },
+        cardIds: { ...state.cardIds, [columnId]: [...existingIds, card.id] },
       };
     });
 
     return card;
   },
-  updateCard: (id, changes) =>
+  updateCard: async (id, changes) => {
+    const updated = await cardApi.updateCard(id, changes);
     set((state) => {
-      const existing = state.cards[id];
-      if (!existing) return state;
-
-      const updated: Card = {
-        ...existing,
-        ...changes,
-      };
-
-      return {
-        cards: {
-          ...state.cards,
-          [id]: updated,
-        },
-      };
-    }),
-  deleteCard: (id) =>
+      if (!state.cards[id]) return state;
+      return { cards: { ...state.cards, [id]: updated } };
+    });
+  },
+  deleteCard: async (id) => {
+    await cardApi.deleteCard(id);
     set((state) => {
       const existing = state.cards[id];
       if (!existing) return state;
@@ -102,7 +86,52 @@ export const useCardStore = create<CardStore>()(
           [existing.columnId]: idsForColumn.filter((cardId) => cardId !== id),
         },
       };
-    }),
+    });
+  },
+  moveCard: async (cardId, fromColumnId, toColumnId, toIndex) => {
+    set((state) => {
+      const fromIds = state.cardIds[fromColumnId] ?? [];
+      if (!fromIds.includes(cardId)) {
+        return state;
+      }
+
+      const baseFromIds = fromIds.filter((id) => id !== cardId);
+      const baseToIds =
+        fromColumnId === toColumnId
+          ? baseFromIds
+          : state.cardIds[toColumnId] ?? [];
+
+      const safeIndex = Math.max(0, Math.min(toIndex, baseToIds.length));
+      const nextToIds = [
+        ...baseToIds.slice(0, safeIndex),
+        cardId,
+        ...baseToIds.slice(safeIndex),
+      ];
+
+      const nextCardIds = { ...state.cardIds };
+      nextCardIds[fromColumnId] = baseFromIds;
+      nextCardIds[toColumnId] = nextToIds;
+
+      const existing = state.cards[cardId];
+      if (!existing) {
+        return { ...state, cardIds: nextCardIds };
+      }
+
+      const updated: Card = { ...existing, columnId: toColumnId };
+
+      return {
+        cards: { ...state.cards, [cardId]: updated },
+        cardIds: nextCardIds,
+      };
+    });
+
+    try {
+      await cardApi.moveCard(cardId, fromColumnId, toColumnId, toIndex);
+    } catch (error) {
+      console.error("Failed to persist card move", error);
+      // In a later task, we can add a toast + revert strategy.
+    }
+  },
   removeCardsByColumns: (columnIds) =>
     set((state) => {
       if (columnIds.length === 0) return state;

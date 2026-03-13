@@ -75,20 +75,24 @@ export function CardDetailModal({
       return;
     }
     setTitleError(null);
-    updateCard(card.id, {
-      title: trimmed,
-      description: state.description,
-      tags: state.tags,
-      dueDate: state.dueDate || null,
-    });
-    onClose();
+    void (async () => {
+      await updateCard(card.id, {
+        title: trimmed,
+        description: state.description,
+        tags: state.tags,
+        dueDate: state.dueDate || null,
+      });
+      onClose();
+    })();
   }
 
   function handleDeleteConfirm() {
     if (!card) return;
-    deleteCard(card.id);
-    setDeleteConfirmOpen(false);
-    onClose();
+    void (async () => {
+      await deleteCard(card.id);
+      setDeleteConfirmOpen(false);
+      onClose();
+    })();
   }
 
   const dueDateValue =

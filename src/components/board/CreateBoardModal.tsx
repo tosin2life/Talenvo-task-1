@@ -17,7 +17,7 @@ export function CreateBoardModal({ open, onClose }: CreateBoardModalProps) {
 
   const createBoard = useBoardStore((state) => state.createBoard);
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
     if (isSubmitting) return;
@@ -30,16 +30,22 @@ export function CreateBoardModal({ open, onClose }: CreateBoardModalProps) {
 
     setIsSubmitting(true);
 
-    createBoard({
-      title: trimmed.slice(0, 80),
-      description: description.slice(0, 300),
-    });
+    try {
+      await createBoard({
+        title: trimmed.slice(0, 80),
+        description: description.slice(0, 300),
+      });
 
-    setTitle("");
-    setDescription("");
-    setError(null);
-    setIsSubmitting(false);
-    onClose();
+      setTitle("");
+      setDescription("");
+      setError(null);
+      onClose();
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Failed to create board";
+      setError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const titleId = "create-board-title";

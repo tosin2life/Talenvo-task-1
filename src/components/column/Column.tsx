@@ -1,4 +1,4 @@
-import { useState, memo } from "react";
+import { useState, memo, useCallback } from "react";
 import type { Column as ColumnType, Card as CardType } from "@/types";
 import { KanbanCard } from "./KanbanCard";
 import { useColumnStore } from "@/store/columnStore";
@@ -27,18 +27,82 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
   const [newCardTitle, setNewCardTitle] = useState("");
   const [cardError, setCardError] = useState<string | null>(null);
 
+  const moveCard = useCardStore((state) => state.moveCard);
+
+  const handleCardDragStart = useCallback(
+    (event: React.DragEvent<HTMLButtonElement>, cardId: string) => {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData(
+        "application/x-knowledge-card",
+        JSON.stringify({
+          cardId,
+          fromColumnId: column.id,
+        }),
+      );
+    },
+    [column.id],
+  );
+
+  const handleCardDropOnList = useCallback(
+    (event: React.DragEvent<HTMLUListElement>) => {
+      event.preventDefault();
+      const raw = event.dataTransfer.getData("application/x-knowledge-card");
+      if (!raw) return;
+      let parsed: { cardId: string; fromColumnId: string } | null = null;
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        return;
+      }
+      if (!parsed) return;
+
+      const { cardId, fromColumnId } = parsed;
+      void moveCard(cardId, fromColumnId, column.id, cards.length);
+    },
+    [cards.length, column.id, moveCard],
+  );
+
+  const handleCardDropOnItem = useCallback(
+    (
+      event: React.DragEvent<HTMLButtonElement>,
+      targetCardId: string,
+      targetIndex: number,
+    ) => {
+      event.preventDefault();
+      const raw = event.dataTransfer.getData("application/x-knowledge-card");
+      if (!raw) return;
+      let parsed: { cardId: string; fromColumnId: string } | null = null;
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        return;
+      }
+      if (!parsed) return;
+
+      const { cardId, fromColumnId } = parsed;
+      if (cardId === targetCardId && fromColumnId === column.id) return;
+
+      void moveCard(cardId, fromColumnId, column.id, targetIndex);
+    },
+    [column.id, moveCard],
+  );
+
+  const handleAllowDrop = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+  }, []);
+
   function handleSaveTitle() {
     const trimmed = titleDraft.trim();
     if (!trimmed) {
       setTitleDraft(column.title);
     } else if (trimmed !== column.title) {
-      updateColumn(column.id, { title: trimmed });
+      void updateColumn(column.id, { title: trimmed });
     }
     setIsEditingTitle(false);
   }
 
   function handleDeleteColumn() {
-    deleteColumn(column.id);
+    void deleteColumn(column.id);
     setDeleteOpen(false);
   }
 
@@ -48,10 +112,18 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
       setCardError("Card title is required");
       return;
     }
-    const newCard = createCard(column.id, trimmed);
-    setNewCardTitle("");
-    setCardError(null);
-    onOpenCardDetail?.(newCard.id);
+    void (async () => {
+      try {
+        const newCard = await createCard(column.id, trimmed);
+        setNewCardTitle("");
+        setCardError(null);
+        onOpenCardDetail?.(newCard.id);
+      } catch (e) {
+        const message =
+          e instanceof Error ? e.message : "Failed to create card";
+        setCardError(message);
+      }
+    })();
   }
 
   function handleKeyDownTitle(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -117,6 +189,8 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
           className="flex flex-1 flex-col gap-2 list-none p-0 m-0"
           role="list"
           aria-label={`Cards in ${column.title}`}
+          onDragOver={handleAllowDrop}
+          onDrop={handleCardDropOnList}
         >
           {cards.length === 0 ? (
             <li>
@@ -135,11 +209,17 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
               </button>
             </li>
           ) : (
-            cards.map((card) => (
+            cards.map((card, index) => (
               <li key={card.id} role="listitem">
                 <button
                   type="button"
-                  className="w-full text-left"
+                  className="w-full text-left cursor-grab active:cursor-grabbing"
+                  draggable
+                  onDragStart={(event) => handleCardDragStart(event, card.id)}
+                  onDragOver={handleAllowDrop}
+                  onDrop={(event) =>
+                    handleCardDropOnItem(event, card.id, index)
+                  }
                   onClick={() => onOpenCardDetail?.(card.id)}
                 >
                   <KanbanCard card={card} />

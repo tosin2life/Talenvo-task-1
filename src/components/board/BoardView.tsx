@@ -21,6 +21,7 @@ export function BoardView({ boardId }: BoardViewProps) {
 
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [columnError, setColumnError] = useState<string | null>(null);
+  const [isColumnFormOpen, setIsColumnFormOpen] = useState(false);
   const createColumn = useColumnStore((state) => state.createColumn);
 
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -33,7 +34,7 @@ export function BoardView({ boardId }: BoardViewProps) {
     setActiveBoardId(boardId);
   }, [boardId, setActiveBoardId]);
 
-  function handleCreateColumn(event: React.FormEvent) {
+  async function handleCreateColumn(event: React.FormEvent) {
     event.preventDefault();
     const trimmed = newColumnTitle.trim();
 
@@ -42,9 +43,15 @@ export function BoardView({ boardId }: BoardViewProps) {
       return;
     }
 
-    createColumn(boardId, trimmed);
-    setNewColumnTitle("");
-    setColumnError(null);
+    try {
+      await createColumn(boardId, trimmed);
+      setNewColumnTitle("");
+      setColumnError(null);
+      setIsColumnFormOpen(false);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Failed to create column";
+      setColumnError(message);
+    }
   }
 
   const handleOpenCardDetail = useCallback((cardId: string) => {
@@ -62,12 +69,6 @@ export function BoardView({ boardId }: BoardViewProps) {
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8">
         <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 rounded-md border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-white/20"
-            >
-              &larr; Back to boards
-            </Link>
             <h1 className="text-2xl font-semibold tracking-tight">
               {board?.title ?? "Board"}
             </h1>
@@ -76,7 +77,69 @@ export function BoardView({ boardId }: BoardViewProps) {
                 "Organise work into columns and cards on this board."}
             </p>
           </div>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-slate-900/60 px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              Back to boards
+            </Link>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => {
+                setIsColumnFormOpen((open) => !open);
+                setColumnError(null);
+              }}
+            >
+              + Add column
+            </Button>
+          </div>
         </header>
+
+        {isColumnFormOpen ? (
+          <form
+            onSubmit={handleCreateColumn}
+            className="ml-auto flex w-full max-w-sm flex-col gap-2 rounded-lg border border-border bg-slate-950/40 p-3"
+          >
+            <label
+              htmlFor="new-column-title"
+              className="text-xs font-medium text-muted-foreground"
+            >
+              Column name
+            </label>
+            <Input
+              id="new-column-title"
+              value={newColumnTitle}
+              onChange={(event) => {
+                setNewColumnTitle(event.target.value);
+                if (columnError) setColumnError(null);
+              }}
+              placeholder="Enter column name"
+              aria-invalid={Boolean(columnError)}
+            />
+            {columnError ? (
+              <p className="text-xs text-red-400">{columnError}</p>
+            ) : null}
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setIsColumnFormOpen(false);
+                  setNewColumnTitle("");
+                  setColumnError(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" size="sm">
+                Create column
+              </Button>
+            </div>
+          </form>
+        ) : null}
 
         <section
           aria-label="Board columns"
@@ -87,41 +150,6 @@ export function BoardView({ boardId }: BoardViewProps) {
               boardId={boardId}
               onOpenCardDetail={handleOpenCardDetail}
             />
-
-            <form
-              onSubmit={handleCreateColumn}
-              className="flex w-72 flex-shrink-0 flex-col gap-2 rounded-lg border border-dashed border-border bg-slate-950/50 p-3"
-            >
-              <label
-                htmlFor="new-column-title"
-                className="text-xs font-medium text-muted-foreground"
-              >
-                Add column
-              </label>
-              <Input
-                id="new-column-title"
-                value={newColumnTitle}
-                onChange={(event) => {
-                  setNewColumnTitle(event.target.value);
-                  if (columnError) setColumnError(null);
-                }}
-                placeholder="Column name"
-                onBlur={() => {
-                  if (!newColumnTitle.trim()) {
-                    setColumnError("Column name is required");
-                  }
-                }}
-                aria-invalid={Boolean(columnError)}
-              />
-              {columnError ? (
-                <p className="text-xs text-red-400">{columnError}</p>
-              ) : null}
-              <div className="flex justify-end">
-                <Button type="submit" size="sm">
-                  + Add Column
-                </Button>
-              </div>
-            </form>
           </div>
         </section>
       </div>

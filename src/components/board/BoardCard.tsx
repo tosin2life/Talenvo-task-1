@@ -23,7 +23,7 @@ function BoardCardInner({ board }: BoardCardProps) {
       .getState()
       .removeColumnsByBoard(board.id);
     useCardStore.getState().removeCardsByColumns(removedColumnIds);
-    deleteBoard(board.id);
+    void deleteBoard(board.id);
     setConfirmOpen(false);
   }
 

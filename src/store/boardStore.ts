@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Board } from "@/types";
+import { boardApi } from "@/api";
 
 type BoardState = {
   boards: Record<string, Board>;
@@ -9,12 +10,12 @@ type BoardState = {
 
 type BoardActions = {
   setInitialBoards: (boards: Board[]) => void;
-  createBoard: (input: { title: string; description: string }) => Board;
+  createBoard: (input: { title: string; description: string }) => Promise<Board>;
   updateBoard: (
     id: string,
     changes: Pick<Partial<Board>, "title" | "description">,
-  ) => void;
-  deleteBoard: (id: string) => void;
+  ) => Promise<void>;
+  deleteBoard: (id: string) => Promise<void>;
 };
 
 type BoardStore = BoardState & BoardActions;
@@ -39,53 +40,39 @@ export const useBoardStore = create<BoardStore>()(
             boardIds: ids,
           };
         }),
-      createBoard: ({ title, description }) => {
-        const board: Board = {
-          id: crypto.randomUUID(),
-          title,
-          description,
-          createdAt: new Date().toISOString(),
-        };
+      createBoard: async ({ title, description }) => {
+        const board = await boardApi.createBoard({ title, description });
 
         set((state) => ({
-          boards: {
-            ...state.boards,
-            [board.id]: board,
-          },
-          boardIds: [...state.boardIds, board.id],
+          boards: { ...state.boards, [board.id]: board },
+          boardIds: state.boardIds.includes(board.id)
+            ? state.boardIds
+            : [...state.boardIds, board.id],
         }));
 
         return board;
       },
-      updateBoard: (id, changes) =>
-        set((state) => {
-          const existing = state.boards[id];
-          if (!existing) return state;
-
-          const updated: Board = {
-            ...existing,
-            ...changes,
-          };
-
-          return {
-            boards: {
-              ...state.boards,
-              [id]: updated,
-            },
-          };
-        }),
-      deleteBoard: (id) =>
+      updateBoard: async (id, changes) => {
+        const updated = await boardApi.updateBoard(id, changes);
         set((state) => {
           if (!state.boards[id]) return state;
-
+          return {
+            boards: { ...state.boards, [id]: updated },
+          };
+        });
+      },
+      deleteBoard: async (id) => {
+        await boardApi.deleteBoard(id);
+        set((state) => {
+          if (!state.boards[id]) return state;
           const rest = { ...state.boards };
           delete rest[id];
-
           return {
             boards: rest,
             boardIds: state.boardIds.filter((boardId) => boardId !== id),
           };
-        }),
+        });
+      },
     }),
     {
       name: "knowledge-board-boards",
