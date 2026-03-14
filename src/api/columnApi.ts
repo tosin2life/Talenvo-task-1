@@ -126,3 +126,11 @@ export async function deleteColumn(id: string, options?: MockApiOptions): Promis
   return existing;
 }
 
+export async function listAllColumns(options?: MockApiOptions): Promise<Column[]> {
+  await mockNetworkDelay(options);
+  maybeThrowRandomFailure(options);
+  const { columns } = readColumnsState();
+  return Object.values(columns);
+}
+
+

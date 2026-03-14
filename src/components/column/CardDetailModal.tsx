@@ -8,6 +8,7 @@ import { MarkdownRenderer } from "@/lib/markdown";
 import { useCardForm } from "@/hooks/useCardForm";
 import { useCardStore } from "@/store/cardStore";
 import { X } from "lucide-react";
+import { CommentThread } from "@/components/comments/CommentThread";
 
 const MAX_TAGS = 10;
 const MAX_TAG_LENGTH = 24;
@@ -204,6 +205,8 @@ export function CardDetailModal({
             }
           />
         </div>
+
+        <CommentThread cardId={card.id} />
 
         {!deleteConfirmOpen ? (
           <div className="flex flex-wrap items-center justify-end gap-2 pt-2">

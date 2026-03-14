@@ -22,6 +22,17 @@ export interface Card {
   createdAt: string;
 }
 
+export interface Comment {
+  id: string;
+  cardId: string;
+  parentId: string | null;
+  author: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string | null;
+  isDeleted?: boolean;
+}
+
 export interface UIState {
   activeBoardId: string | null;
   openModal: "createBoard" | "editBoard" | "cardDetail" | null;

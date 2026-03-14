@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { useColumnStore } from "@/store/columnStore";
 import { CardDetailModal } from "@/components/column/CardDetailModal";
 import { useCardStore } from "@/store/cardStore";
+import { useUndoStore } from "@/store/undoStore";
 
 interface BoardViewProps {
   boardId: string;
@@ -64,6 +65,26 @@ export function BoardView({ boardId }: BoardViewProps) {
     setSelectedCardId(null);
   }, []);
 
+  const undo = useUndoStore((s) => s.undo);
+  const redo = useUndoStore((s) => s.redo);
+  const canUndo = useUndoStore((s) => s.undoStack.length > 0);
+  const canRedo = useUndoStore((s) => s.redoStack.length > 0);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "z") {
+        e.preventDefault();
+        void undo();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "y") {
+        e.preventDefault();
+        void redo();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [undo, redo]);
+
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8">
@@ -78,6 +99,26 @@ export function BoardView({ boardId }: BoardViewProps) {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => void undo()}
+              disabled={!canUndo}
+              title="Undo (Ctrl+Z)"
+            >
+              Undo
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => void redo()}
+              disabled={!canRedo}
+              title="Redo (Ctrl+Y)"
+            >
+              Redo
+            </Button>
             <Link
               href="/"
               className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-slate-900/60 px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"

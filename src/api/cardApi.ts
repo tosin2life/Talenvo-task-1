@@ -128,6 +128,29 @@ export async function deleteCard(id: string, options?: MockApiOptions): Promise<
   return existing;
 }
 
+/** Restores a previously deleted card (used for undo). */
+export async function restoreCard(
+  card: Card,
+  options?: MockApiOptions,
+): Promise<Card> {
+  await mockNetworkDelay(options);
+  maybeThrowRandomFailure(options);
+
+  const { cards, cardIds } = readCardsState();
+  if (cards[card.id]) {
+    return cards[card.id];
+  }
+
+  const existingIds = cardIds[card.columnId] ?? [];
+
+  writeCardsState({
+    cards: { ...cards, [card.id]: card },
+    cardIds: { ...cardIds, [card.columnId]: [...existingIds, card.id] },
+  });
+
+  return card;
+}
+
 export async function moveCard(
   cardId: string,
   fromColumnId: string,
@@ -145,7 +168,12 @@ export async function moveCard(
   }
 
   const fromIds = cardIds[fromColumnId] ?? [];
+  const toIds = cardIds[toColumnId] ?? [];
+
   if (!fromIds.includes(cardId)) {
+    if (existing.columnId === toColumnId && toIds.includes(cardId)) {
+      return existing;
+    }
     throw new ApiError("Card not in expected column", {
       status: 409,
       code: "CONFLICT",
@@ -181,5 +209,13 @@ export async function moveCard(
 
   return updated;
 }
+
+export async function listAllCards(options?: MockApiOptions): Promise<Card[]> {
+  await mockNetworkDelay(options);
+  maybeThrowRandomFailure(options);
+  const { cards } = readCardsState();
+  return Object.values(cards);
+}
+
 
 

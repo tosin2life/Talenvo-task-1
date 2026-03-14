@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useBoardStore } from "@/store/boardStore";
 import { useColumnStore } from "@/store/columnStore";
 import { useCardStore } from "@/store/cardStore";
+import { useRealtimeSubscription } from "@/realtime/realtimeClient";
 
 interface StoreHydrationProps {
   children: React.ReactNode;
@@ -11,12 +12,18 @@ interface StoreHydrationProps {
 
 export function StoreHydration({ children }: StoreHydrationProps) {
   const [hydrated, setHydrated] = useState(false);
+  useRealtimeSubscription();
 
   useEffect(() => {
     useBoardStore.persist.rehydrate();
     useColumnStore.persist.rehydrate();
     useCardStore.persist.rehydrate();
-    setHydrated(true);
+    const timeoutId = window.setTimeout(() => {
+      setHydrated(true);
+    }, 0);
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   if (!hydrated) {
