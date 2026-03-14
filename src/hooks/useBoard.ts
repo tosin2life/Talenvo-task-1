@@ -6,6 +6,11 @@ import { useUIStore } from "@/store/uiStore";
 
 const EMPTY_COLUMN_IDS: string[] = [];
 
+/**
+ * Step 2: Optimize re-renders
+ * Returns columnsWithCardIds (cardIds per column) so each Column
+ * can subscribe narrowly to only its cards via useShallow.
+ */
 export function useBoard(boardId: string | null) {
   const activeBoardId = useUIStore((state) => state.activeBoardId);
   const resolvedBoardId = boardId ?? activeBoardId;
@@ -22,26 +27,19 @@ export function useBoard(boardId: string | null) {
   );
 
   const columns = useColumnStore((state) => state.columns);
-  const cards = useCardStore((state) => state.cards);
   const cardIds = useCardStore((state) => state.cardIds);
 
-  const columnsWithCards = useMemo(() => {
+  const columnsWithCardIds = useMemo(() => {
     if (!resolvedBoardId) return [];
-
     return columnIds.map((columnId) => {
       const column = columns[columnId];
       const idsForColumn = cardIds[columnId] ?? [];
-      const columnCards = idsForColumn.map((id) => cards[id]).filter(Boolean);
-
-      return {
-        column,
-        cards: columnCards,
-      };
+      return { column, cardIds: idsForColumn };
     });
-  }, [resolvedBoardId, columnIds, columns, cards, cardIds]);
+  }, [resolvedBoardId, columnIds, columns, cardIds]);
 
   return {
     board,
-    columnsWithCards,
+    columnsWithCardIds,
   };
 }

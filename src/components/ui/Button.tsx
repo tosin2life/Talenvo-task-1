@@ -3,8 +3,7 @@ import * as React from "react";
 type Variant = "primary" | "secondary" | "ghost" | "destructive";
 type Size = "sm" | "md";
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
 }
@@ -40,4 +39,3 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     );
   },
 );
-

@@ -3,6 +3,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useBoardStore } from "@/store/boardStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface CreateBoardModalProps {
   open: boolean;
@@ -39,10 +40,12 @@ export function CreateBoardModal({ open, onClose }: CreateBoardModalProps) {
       setTitle("");
       setDescription("");
       setError(null);
+      useToastStore.getState().addToast("Board created");
       onClose();
     } catch (e) {
       const message = e instanceof Error ? e.message : "Failed to create board";
       setError(message);
+      useToastStore.getState().addToast(message, "error");
     } finally {
       setIsSubmitting(false);
     }

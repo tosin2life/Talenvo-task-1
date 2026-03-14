@@ -1,7 +1,6 @@
 import * as React from "react";
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement> {}
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {}
 
 export function Badge({ className, ...props }: BadgeProps) {
   return (
@@ -11,4 +10,3 @@ export function Badge({ className, ...props }: BadgeProps) {
     />
   );
 }
-

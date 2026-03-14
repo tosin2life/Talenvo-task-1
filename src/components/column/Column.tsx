@@ -1,8 +1,11 @@
 import { useState, memo, useCallback } from "react";
-import type { Column as ColumnType, Card as CardType } from "@/types";
+import { useShallow } from "zustand/react/shallow";
+import type { Column as ColumnType } from "@/types";
 import { KanbanCard } from "./KanbanCard";
+import { VirtualCardList, VIRTUAL_THRESHOLD } from "./VirtualCardList";
 import { useColumnStore } from "@/store/columnStore";
 import { useCardStore } from "@/store/cardStore";
+import { useToastStore } from "@/store/toastStore";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Trash2 } from "lucide-react";
@@ -10,11 +13,15 @@ import { Modal } from "@/components/ui/Modal";
 
 interface ColumnProps {
   column: ColumnType;
-  cards: CardType[];
+  cardIds: string[];
   onOpenCardDetail?: (cardId: string) => void;
 }
 
-function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
+function ColumnInner({ column, cardIds, onOpenCardDetail }: ColumnProps) {
+  /** Step 2: Narrow selector + useShallow — only re-render when this column's cards change */
+  const cards = useCardStore(
+    useShallow((s) => cardIds.map((id) => s.cards[id]).filter(Boolean)),
+  );
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(column.title);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -44,7 +51,7 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
   );
 
   const handleCardDropOnList = useCallback(
-    (event: React.DragEvent<HTMLUListElement>) => {
+    (event: React.DragEvent<HTMLElement>) => {
       event.preventDefault();
       const raw = event.dataTransfer.getData("application/x-knowledge-card");
       if (!raw) return;
@@ -57,9 +64,9 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
       if (!parsed) return;
 
       const { cardId, fromColumnId } = parsed;
-      void moveCard(cardId, fromColumnId, column.id, cards.length);
+      void moveCard(cardId, fromColumnId, column.id, cardIds.length);
     },
-    [cards.length, column.id, moveCard],
+    [cardIds.length, column.id, moveCard],
   );
 
   const handleCardDropOnItem = useCallback(
@@ -102,8 +109,16 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
   }
 
   function handleDeleteColumn() {
-    void deleteColumn(column.id);
-    setDeleteOpen(false);
+    void (async () => {
+      try {
+        await deleteColumn(column.id);
+        useToastStore.getState().addToast("Column deleted");
+        setDeleteOpen(false);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to delete column";
+        useToastStore.getState().addToast(msg, "error");
+      }
+    })();
   }
 
   function handleCreateCard() {
@@ -117,11 +132,13 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
         const newCard = await createCard(column.id, trimmed);
         setNewCardTitle("");
         setCardError(null);
+        useToastStore.getState().addToast("Card created");
         onOpenCardDetail?.(newCard.id);
       } catch (e) {
         const message =
           e instanceof Error ? e.message : "Failed to create card";
         setCardError(message);
+        useToastStore.getState().addToast(message, "error");
       }
     })();
   }
@@ -185,18 +202,19 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
           </div>
         </header>
 
-        <ul
-          className="flex flex-1 flex-col gap-2 list-none p-0 m-0"
-          role="list"
-          aria-label={`Cards in ${column.title}`}
-          onDragOver={handleAllowDrop}
-          onDrop={handleCardDropOnList}
-        >
-          {cards.length === 0 ? (
-            <li>
+        {cards.length === 0 ? (
+          <ul
+            className="flex flex-1 flex-col gap-2 list-none p-0 m-0"
+            role="list"
+            aria-label={`Cards in ${column.title}`}
+            onDragOver={handleAllowDrop}
+            onDrop={handleCardDropOnList}
+          >
+            <li className="flex flex-1 flex-col items-center justify-center gap-2 py-6">
+              <p className="text-xs text-muted-foreground">No cards yet</p>
               <button
                 type="button"
-                className="flex h-16 w-full items-center justify-center rounded-md border border-dashed border-slate-700 text-xs text-muted-foreground hover:border-sky-500 hover:text-sky-400"
+                className="flex h-12 min-w-[140px] items-center justify-center rounded-md border border-dashed border-slate-700 text-xs text-muted-foreground hover:border-sky-500 hover:text-sky-400"
                 onClick={() => {
                   const input = document.getElementById(
                     `new-card-title-${column.id}`,
@@ -208,8 +226,40 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
                 + Add a card
               </button>
             </li>
-          ) : (
-            cards.map((card, index) => (
+          </ul>
+        ) : cards.length > VIRTUAL_THRESHOLD ? (
+          <div
+            className="flex flex-1 flex-col min-h-0"
+            onDragOver={handleAllowDrop}
+            onDrop={handleCardDropOnList}
+          >
+            <VirtualCardList
+              items={cards}
+              getKey={(c) => c.id}
+              renderItem={(card, index) => (
+                <button
+                  type="button"
+                  className="w-full text-left cursor-grab active:cursor-grabbing"
+                  draggable
+                  onDragStart={(e) => handleCardDragStart(e, card.id)}
+                  onDragOver={handleAllowDrop}
+                  onDrop={(e) => handleCardDropOnItem(e, card.id, index)}
+                  onClick={() => onOpenCardDetail?.(card.id)}
+                >
+                  <KanbanCard card={card} />
+                </button>
+              )}
+            />
+          </div>
+        ) : (
+          <ul
+            className="flex flex-1 flex-col gap-2 list-none p-0 m-0"
+            role="list"
+            aria-label={`Cards in ${column.title}`}
+            onDragOver={handleAllowDrop}
+            onDrop={handleCardDropOnList}
+          >
+            {cards.map((card, index) => (
               <li key={card.id} role="listitem">
                 <button
                   type="button"
@@ -225,9 +275,9 @@ function ColumnInner({ column, cards, onOpenCardDetail }: ColumnProps) {
                   <KanbanCard card={card} />
                 </button>
               </li>
-            ))
-          )}
-        </ul>
+            ))}
+          </ul>
+        )}
 
         <div className="mt-3 space-y-2">
           <Input

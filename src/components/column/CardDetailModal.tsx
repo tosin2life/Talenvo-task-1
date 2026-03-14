@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { MarkdownRenderer } from "@/lib/markdown";
 import { useCardForm } from "@/hooks/useCardForm";
 import { useCardStore } from "@/store/cardStore";
+import { useToastStore } from "@/store/toastStore";
 import { X } from "lucide-react";
 import { CommentThread } from "@/components/comments/CommentThread";
 
@@ -77,22 +78,34 @@ export function CardDetailModal({
     }
     setTitleError(null);
     void (async () => {
-      await updateCard(card.id, {
-        title: trimmed,
-        description: state.description,
-        tags: state.tags,
-        dueDate: state.dueDate || null,
-      });
-      onClose();
+      try {
+        await updateCard(card.id, {
+          title: trimmed,
+          description: state.description,
+          tags: state.tags,
+          dueDate: state.dueDate || null,
+        });
+        useToastStore.getState().addToast("Card updated");
+        onClose();
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to update card";
+        useToastStore.getState().addToast(msg, "error");
+      }
     })();
   }
 
   function handleDeleteConfirm() {
     if (!card) return;
     void (async () => {
-      await deleteCard(card.id);
-      setDeleteConfirmOpen(false);
-      onClose();
+      try {
+        await deleteCard(card.id);
+        useToastStore.getState().addToast("Card deleted");
+        setDeleteConfirmOpen(false);
+        onClose();
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "Failed to delete card";
+        useToastStore.getState().addToast(msg, "error");
+      }
     })();
   }
 

@@ -3,6 +3,9 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { StoreHydration } from "@/components/StoreHydration";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ToastContainer } from "@/components/ui/Toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,21 +29,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <nav className="flex items-center gap-3 border-b border-white/10 bg-indigo-700 px-4 py-3">
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('knowledge-board-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);})();`,
+          }}
+        />
+        <nav className="flex items-center justify-between gap-3 border-b border-white/10 bg-indigo-700 px-4 py-3">
           <Link
             href="/"
             className="text-base font-bold tracking-tight text-white hover:text-blue-200 transition-colors"
           >
             Knowledge Board
           </Link>
+          <ThemeToggle />
         </nav>
-        <StoreHydration>{children}</StoreHydration>
+        <ErrorBoundary>
+          <StoreHydration>{children}</StoreHydration>
+          <ToastContainer />
+        </ErrorBoundary>
       </body>
     </html>
   );
 }
-

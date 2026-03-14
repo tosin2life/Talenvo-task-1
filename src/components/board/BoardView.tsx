@@ -11,6 +11,7 @@ import { useColumnStore } from "@/store/columnStore";
 import { CardDetailModal } from "@/components/column/CardDetailModal";
 import { useCardStore } from "@/store/cardStore";
 import { useUndoStore } from "@/store/undoStore";
+import { useToastStore } from "@/store/toastStore";
 
 interface BoardViewProps {
   boardId: string;
@@ -18,7 +19,7 @@ interface BoardViewProps {
 
 export function BoardView({ boardId }: BoardViewProps) {
   const setActiveBoardId = useUIStore((state) => state.setActiveBoardId);
-  const { board } = useBoard(boardId);
+  const { board, columnsWithCardIds } = useBoard(boardId);
 
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [columnError, setColumnError] = useState<string | null>(null);
@@ -48,10 +49,13 @@ export function BoardView({ boardId }: BoardViewProps) {
       await createColumn(boardId, trimmed);
       setNewColumnTitle("");
       setColumnError(null);
+      useToastStore.getState().addToast("Column created");
       setIsColumnFormOpen(false);
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Failed to create column";
+      const message =
+        e instanceof Error ? e.message : "Failed to create column";
       setColumnError(message);
+      useToastStore.getState().addToast(message, "error");
     }
   }
 
@@ -186,12 +190,40 @@ export function BoardView({ boardId }: BoardViewProps) {
           aria-label="Board columns"
           className="min-h-[60vh] rounded-lg border border-border bg-card p-4"
         >
-          <div className="flex items-start gap-4 overflow-x-auto pb-2">
-            <ColumnList
-              boardId={boardId}
-              onOpenCardDetail={handleOpenCardDetail}
-            />
-          </div>
+          {columnsWithCardIds.length === 0 ? (
+            <div
+              className="flex flex-1 flex-col items-center justify-center gap-4 py-16 text-center"
+              aria-labelledby="empty-columns-title"
+            >
+              <h2
+                id="empty-columns-title"
+                className="text-lg font-semibold tracking-tight"
+              >
+                Add your first column
+              </h2>
+              <p className="max-w-md text-sm text-muted-foreground">
+                Columns organise your cards into groups. Create a column to
+                start adding cards to this board.
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setIsColumnFormOpen(true);
+                  setColumnError(null);
+                }}
+              >
+                + Add column
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-start gap-4 overflow-x-auto pb-2">
+              <ColumnList
+                boardId={boardId}
+                onOpenCardDetail={handleOpenCardDetail}
+              />
+            </div>
+          )}
         </section>
       </div>
 

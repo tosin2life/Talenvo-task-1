@@ -29,6 +29,7 @@ src/
 │   ├── column/             # Column + card feature
 │   │   ├── Column.tsx
 │   │   ├── ColumnList.tsx
+│   │   ├── VirtualCardList.tsx  # Virtualized list for columns with 20+ cards
 │   │   ├── KanbanCard.tsx
 │   │   └── CardDetailModal.tsx
 │   └── StoreHydration.tsx  # Rehydrates persisted stores before rendering
@@ -114,10 +115,34 @@ Stores are **persisted** (Zustand `persist` with `skipHydration: true`) and rehy
 
 ## 4. Performance strategy
 
-- **Code splitting**: The **board view** is lazy-loaded via `next/dynamic` in `app/board/[boardId]/page.tsx`. `BoardView` and its subtree load in a separate chunk; a `BoardViewSkeleton` (Tailwind `animate-pulse`) is shown until the chunk is ready. `ssr: false` keeps the board view client-only and avoids loading its bundle on initial server render.
-- **Memoization**: List items that receive stable props are wrapped in `React.memo`: `BoardCard`, `KanbanCard`, `Column`. So updates to one board/card/column do not re-render siblings.
-- **Stable callbacks**: In `BoardView`, `handleOpenCardDetail` and `handleCloseCardModal` are created with `useCallback` (empty deps where possible) so that memoized children do not re-render when the parent re-runs.
-- **Selectors**: Components use granular Zustand selectors (e.g. `state.boardIds.length`, `state.boards[id]`) instead of subscribing to the whole store, so only the selected slice triggers re-renders when it changes.
+- **Code splitting**: The board view is lazy-loaded via `next/dynamic` in `app/board/[boardId]/page.tsx`. `BoardView` and its subtree load in a separate chunk; a `BoardViewSkeleton` is shown until ready.
+- **Memoization**: List items with stable props use `React.memo`: `BoardCard`, `KanbanCard`, `Column`, `ColumnList`. Updates to one item do not re-render siblings.
+- **Stable callbacks**: `handleOpenCardDetail` and `handleCloseCardModal` use `useCallback` so memoized children avoid extra re-renders.
+- **Selectors**: Components use granular Zustand selectors (e.g. `state.boardIds.length`, `state.boards[id]`). `Column` uses `useShallow` to select only its cards; re-renders only when that column’s cards change.
+- **List virtualization**: `VirtualCardList` renders only visible cards when a column exceeds 20 items. Scroll handling uses `requestAnimationFrame` to avoid excessive re-renders during scroll.
+
+---
+
+## 4a. Performance notes
+
+**Implemented optimizations**
+
+| Optimization | Where |
+|--------------|-------|
+| Narrow selectors + `useShallow` | `useBoard`, `Column` – select only the slice that changed |
+| List virtualization | `VirtualCardList` – visible items only when column has >20 cards |
+| Memoization | `ColumnList`, `Column`, `KanbanCard`, `BoardCard` wrapped in `memo` |
+| Scroll throttling | `VirtualCardList` uses `requestAnimationFrame` for scroll updates |
+
+**Profiling**
+
+- Use React DevTools Profiler to record interactions (scroll, drag, open card).
+- Enable "Highlight updates when components render" to spot unnecessary re-renders.
+- Ensure Profiler captures realistic usage; granular selectors and memo boundaries keep render scope small.
+
+**Scaling**
+
+- Virtualization activates when a column has more than 20 cards. Lower `VIRTUAL_THRESHOLD` in `VirtualCardList.tsx` if columns grow larger.
 
 ---
 
