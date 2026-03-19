@@ -63,10 +63,15 @@ export function CardDetailModal({
   }
 
   function handleTagKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (event.key === "Enter" || event.key === ",") {
+    if (event.key === ",") {
       event.preventDefault();
       addTag(tagInput);
     }
+  }
+
+  function handleTagSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    addTag(tagInput);
   }
 
   function handleSave() {
@@ -171,14 +176,24 @@ export function CardDetailModal({
           >
             Tags (Enter or comma to add, max {MAX_TAGS}, 24 chars each)
           </label>
-          <Input
-            id="card-tags"
-            value={tagInput}
-            onChange={(e) => setTagInput(e.target.value)}
-            onKeyDown={handleTagKeyDown}
-            placeholder="Add tag"
-            disabled={state.tags.length >= MAX_TAGS}
-          />
+          <form onSubmit={handleTagSubmit} className="flex gap-2">
+            <Input
+              id="card-tags"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagKeyDown}
+              enterKeyHint="done"
+              placeholder="Add tag"
+              disabled={state.tags.length >= MAX_TAGS}
+            />
+            <Button
+              type="submit"
+              size="sm"
+              disabled={state.tags.length >= MAX_TAGS || !tagInput.trim()}
+            >
+              Add
+            </Button>
+          </form>
           {state.tags.length > 0 && (
             <ul className="flex flex-wrap gap-1" role="list">
               {state.tags.map((tag, i) => (
