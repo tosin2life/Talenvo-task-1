@@ -194,7 +194,7 @@ function CommentItem({ comment, cardId, level }: CommentItemProps) {
 
   return (
     <article
-      className="space-y-1 rounded-md border border-border bg-slate-900/60 p-2 text-xs"
+      className="space-y-1 rounded-md border border-slate-300 bg-white p-2 text-xs text-slate-900 shadow-sm"
       style={{ marginLeft: maxIndent > 0 ? maxIndent * 4 : 0 }}
     >
       <header className="flex items-center justify-between gap-2">
@@ -212,7 +212,7 @@ function CommentItem({ comment, cardId, level }: CommentItemProps) {
           </span>
         ) : isEditing ? (
           <textarea
-            className="mt-1 w-full rounded-md border border-border bg-slate-950/70 p-1 text-xs"
+            className="mt-1 w-full rounded-md border border-slate-300 bg-white p-1 text-xs text-slate-900"
             value={editDraft}
             onChange={(e) => setEditDraft(e.target.value)}
           />
@@ -283,7 +283,7 @@ function CommentItem({ comment, cardId, level }: CommentItemProps) {
       {isReplying && !disabled && (
         <div className="mt-2 space-y-1">
           <textarea
-            className="w-full rounded-md border border-border bg-slate-950/70 p-1 text-xs"
+            className="w-full rounded-md border border-slate-300 bg-white p-1 text-xs text-slate-900"
             rows={2}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
