@@ -21,7 +21,8 @@ export default function WorkspaceDashboardPage() {
         <header className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">
-              Your Boards{boardCount > 0 ? ` (${boardCount})` : ""}
+              Collaborative Knowledge Board
+              {boardCount > 0 ? ` (${boardCount})` : ""}
             </h1>
             <p className="text-sm text-muted-foreground">
               Create and manage collaborative knowledge boards.

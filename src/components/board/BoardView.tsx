@@ -37,6 +37,17 @@ export function BoardView({ boardId }: BoardViewProps) {
     setActiveBoardId(boardId);
   }, [boardId, setActiveBoardId]);
 
+  useEffect(() => {
+    const previousTitle = document.title;
+    if (board?.title) {
+      document.title = `Board - ${board.title}`;
+    }
+
+    return () => {
+      document.title = previousTitle;
+    };
+  }, [board?.title]);
+
   async function handleCreateColumn(event: React.FormEvent) {
     event.preventDefault();
     const trimmed = newColumnTitle.trim();
