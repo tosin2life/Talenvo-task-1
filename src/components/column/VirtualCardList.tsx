@@ -1,10 +1,4 @@
 "use client";
-
-/**
- * List virtualization: when a column has many cards (>20), only renders visible
- * items to reduce DOM nodes. Uses scroll position + fixed item height.
- * Scroll handler uses requestAnimationFrame to avoid excessive re-renders.
- */
 import { memo, useState, useCallback, useRef, useEffect } from "react";
 
 const ITEM_HEIGHT = 88;

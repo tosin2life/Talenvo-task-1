@@ -11,7 +11,6 @@ interface StoreHydrationProps {
   children: React.ReactNode;
 }
 
-/** Loading skeleton shown during store rehydration */
 function HydrationSkeleton() {
   return (
     <main className="min-h-screen bg-background text-foreground">

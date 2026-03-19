@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Sun, Moon } from "lucide-react";
 
 const STORAGE_KEY = "knowledge-board-theme";
@@ -19,11 +19,9 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
-
-  useEffect(() => {
-    setTheme(getStoredTheme());
-  }, []);
+  // Initialize theme from persisted storage (or fallback) without an effect.
+  // This avoids React warnings about setting state inside an effect on mount.
+  const [theme, setTheme] = useState<Theme>(() => getStoredTheme());
 
   function toggle() {
     const next: Theme = theme === "dark" ? "light" : "dark";
@@ -37,7 +35,9 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       className="inline-flex h-9 w-9 items-center justify-center rounded-md text-white/90 transition-colors hover:bg-white/20 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-700"
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={
+        theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+      }
       title={theme === "dark" ? "Light mode" : "Dark mode"}
     >
       {theme === "dark" ? (

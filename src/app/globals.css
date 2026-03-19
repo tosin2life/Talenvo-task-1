@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Dark theme (default) */
 :root,
 [data-theme="dark"] {
   --background: #0b1120;
@@ -10,20 +9,19 @@
   --muted-foreground: #9ca3af;
   --nav-bg: #4338ca;
   --nav-border: rgba(255, 255, 255, 0.1);
-  --column-bg: rgba(15, 23, 42, 0.6); /* ~tailwind bg-slate-900/60 */
+  --column-bg: rgba(15, 23, 42, 0.6);
   --kanban-card-bg: var(--card);
-  --column-delete-icon: #94a3b8; /* slate-400-ish */
+  --column-delete-icon: #94a3b8;
   --column-delete-hover-bg: rgba(15, 23, 42, 0.2);
-  --column-delete-hover-icon: #0f172a; /* dark text for light-ish hover */
+  --column-delete-hover-icon: #0f172a;
   --input-bg: rgba(15, 23, 42, 0.6);
   --due-date-bg: rgba(2, 6, 23, 0.9);
-  --due-date-color: #34d399; /* emerald-400-ish */
-  --due-date-overdue-color: #f87171; /* red-400-ish */
+  --due-date-color: #34d399;
+  --due-date-overdue-color: #f87171;
   --add-card-section-bg: rgba(255, 255, 255, 0.06);
   --add-card-section-bg-hover: rgba(255, 255, 255, 0.09);
 }
 
-/* Light theme */
 [data-theme="light"] {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -34,13 +32,13 @@
   --nav-border: rgba(255, 255, 255, 0.15);
   --column-bg: #f5f5f4;
   --kanban-card-bg: #ffffff;
-  --column-delete-icon: #334155; /* slate-700-ish */
-  --column-delete-hover-bg: #e5e7eb; /* gray-200 */
+  --column-delete-icon: #334155;
+  --column-delete-hover-bg: #e5e7eb;
   --column-delete-hover-icon: #0f172a;
   --input-bg: #ffffff;
   --due-date-bg: #ffffff;
-  --due-date-color: #16a34a; /* green-600-ish */
-  --due-date-overdue-color: #dc2626; /* red-600-ish */
+  --due-date-color: #16a34a;
+  --due-date-overdue-color: #dc2626;
   --add-card-section-bg: #ffffff;
   --add-card-section-bg-hover: #f3f4f6;
 }

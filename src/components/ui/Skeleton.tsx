@@ -1,7 +1,6 @@
 import * as React from "react";
 
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Optional className for custom sizing (e.g. h-4 w-32) */
   className?: string;
 }
 

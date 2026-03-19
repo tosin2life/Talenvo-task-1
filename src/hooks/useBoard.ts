@@ -6,11 +6,6 @@ import { useUIStore } from "@/store/uiStore";
 
 const EMPTY_COLUMN_IDS: string[] = [];
 
-/**
- * Step 2: Optimize re-renders
- * Returns columnsWithCardIds (cardIds per column) so each Column
- * can subscribe narrowly to only its cards via useShallow.
- */
 export function useBoard(boardId: string | null) {
   const activeBoardId = useUIStore((state) => state.activeBoardId);
   const resolvedBoardId = boardId ?? activeBoardId;

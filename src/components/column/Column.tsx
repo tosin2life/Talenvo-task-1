@@ -18,7 +18,6 @@ interface ColumnProps {
 }
 
 function ColumnInner({ column, cardIds, onOpenCardDetail }: ColumnProps) {
-  /** Step 2: Narrow selector + useShallow — only re-render when this column's cards change */
   const cards = useCardStore(
     useShallow((s) => cardIds.map((id) => s.cards[id]).filter(Boolean)),
   );

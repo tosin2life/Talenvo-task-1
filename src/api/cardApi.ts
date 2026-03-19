@@ -128,7 +128,6 @@ export async function deleteCard(id: string, options?: MockApiOptions): Promise<
   return existing;
 }
 
-/** Restores a previously deleted card (used for undo). */
 export async function restoreCard(
   card: Card,
   options?: MockApiOptions,
