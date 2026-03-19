@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Ovo } from "next/font/google";
 import "./globals.css";
 import { StoreHydration } from "@/components/StoreHydration";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastContainer } from "@/components/ui/Toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const ovoSans = Ovo({
+  variable: "--font-ovo",
+  weight: ["400"],
   subsets: ["latin"],
 });
 
@@ -31,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${ovoSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         <script
           suppressHydrationWarning

@@ -159,7 +159,7 @@ function ColumnInner({ column, cardIds, onOpenCardDetail }: ColumnProps) {
     <>
       <section
         aria-label={column.title}
-        className="flex w-72 flex-shrink-0 flex-col rounded-lg border border-border bg-slate-900/60 p-3"
+        className="flex w-72 flex-shrink-0 flex-col rounded-lg border border-border bg-[var(--column-bg)] p-3 text-foreground"
       >
         <header className="mb-2 flex items-center justify-between gap-2">
           {isEditingTitle ? (
@@ -188,12 +188,12 @@ function ColumnInner({ column, cardIds, onOpenCardDetail }: ColumnProps) {
             </button>
           )}
           <div className="flex items-center gap-1">
-            <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-muted-foreground">
+            <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-50">
               {cards.length}
             </span>
             <button
               type="button"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-slate-800 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full text-[var(--column-delete-icon)] hover:bg-[var(--column-delete-hover-bg)] hover:text-[var(--column-delete-hover-icon)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label="Delete column"
               onClick={() => setDeleteOpen(true)}
             >
@@ -211,10 +211,10 @@ function ColumnInner({ column, cardIds, onOpenCardDetail }: ColumnProps) {
             onDrop={handleCardDropOnList}
           >
             <li className="flex flex-1 flex-col items-center justify-center gap-2 py-6">
-              <p className="text-xs text-muted-foreground">No cards yet</p>
+              <p className="text-xs text-foreground/70">No cards yet</p>
               <button
                 type="button"
-                className="flex h-12 min-w-[140px] items-center justify-center rounded-md border border-dashed border-slate-700 text-xs text-muted-foreground hover:border-sky-500 hover:text-sky-400"
+                  className="flex h-12 min-w-[140px] items-center justify-center rounded-md border border-dashed border-[var(--border)] bg-card/30 text-xs text-foreground/70 hover:border-sky-500 hover:text-sky-400"
                 onClick={() => {
                   const input = document.getElementById(
                     `new-card-title-${column.id}`,

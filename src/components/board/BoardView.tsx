@@ -12,6 +12,7 @@ import { CardDetailModal } from "@/components/column/CardDetailModal";
 import { useCardStore } from "@/store/cardStore";
 import { useUndoStore } from "@/store/undoStore";
 import { useToastStore } from "@/store/toastStore";
+import { RotateCcw, RotateCw } from "lucide-react";
 
 interface BoardViewProps {
   boardId: string;
@@ -93,11 +94,11 @@ export function BoardView({ boardId }: BoardViewProps) {
     <main className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8">
         <header className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
+          <div className="flex-1 min-w-0 space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">
               {board?.title ?? "Board"}
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground break-words max-w-[820px]">
               {board?.description ||
                 "Organise work into columns and cards on this board."}
             </p>
@@ -110,8 +111,11 @@ export function BoardView({ boardId }: BoardViewProps) {
               onClick={() => void undo()}
               disabled={!canUndo}
               title="Undo (Ctrl+Z)"
+              aria-label="Undo (Ctrl+Z)"
+              className="px-2"
             >
-              Undo
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">Undo</span>
             </Button>
             <Button
               type="button"
@@ -120,12 +124,15 @@ export function BoardView({ boardId }: BoardViewProps) {
               onClick={() => void redo()}
               disabled={!canRedo}
               title="Redo (Ctrl+Y)"
+              aria-label="Redo (Ctrl+Y)"
+              className="px-2"
             >
-              Redo
+              <RotateCw className="h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">Redo</span>
             </Button>
             <Link
               href="/"
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-slate-900/60 px-3 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-sky-500 px-3 text-xs font-medium text-white transition-colors hover:bg-sky-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 disabled:bg-sky-500/40 h-9"
             >
               Back to boards
             </Link>

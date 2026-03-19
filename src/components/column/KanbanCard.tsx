@@ -21,7 +21,7 @@ function KanbanCardInner({ card }: KanbanCardProps) {
         : "text-muted-foreground";
 
   return (
-    <article className="space-y-2 rounded-md border border-border bg-card p-3 text-sm shadow-sm">
+    <article className="space-y-2 rounded-md border border-border bg-[var(--kanban-card-bg)] p-3 text-sm text-foreground shadow-md">
       <h3 className="line-clamp-2 font-medium">{card.title}</h3>
 
       {card.tags.length > 0 ? (
@@ -30,9 +30,7 @@ function KanbanCardInner({ card }: KanbanCardProps) {
             <Badge key={tag}>{tag}</Badge>
           ))}
           {remaining > 0 ? (
-            <Badge className="bg-slate-800/80 text-xs text-muted-foreground">
-              +{remaining}
-            </Badge>
+            <Badge className="bg-slate-800/80">+{remaining}</Badge>
           ) : null}
         </div>
       ) : null}

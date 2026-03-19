@@ -29,7 +29,7 @@ function BoardCardInner({ board }: BoardCardProps) {
 
   return (
     <>
-      <article className="group flex flex-col justify-between rounded-lg border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <article className="group flex flex-col justify-between rounded-lg border border-border bg-card p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md data-[theme=light]:bg-[#f5f5f4] data-[theme=light]:shadow-md">
         <div className="flex items-start justify-between gap-2">
           <Link
             href={`/board/${board.id}`}
@@ -46,7 +46,7 @@ function BoardCardInner({ board }: BoardCardProps) {
           </Link>
           <button
             type="button"
-            className="ml-2 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-400 opacity-0 transition hover:bg-slate-800 hover:text-slate-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background group-hover:opacity-100"
+            className="ml-2 inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-slate-400 opacity-0 transition hover:bg-slate-800 hover:text-slate-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background group-hover:opacity-100 data-[theme=light]:opacity-100 data-[theme=light]:text-slate-700 data-[theme=light]:hover:bg-slate-200 data-[theme=light]:hover:text-slate-900"
             aria-label="Delete board"
             onClick={(e) => {
               e.preventDefault();

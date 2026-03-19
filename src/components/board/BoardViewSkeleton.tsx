@@ -13,7 +13,7 @@ export function BoardViewSkeleton() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="flex w-72 flex-shrink-0 flex-col gap-3 rounded-lg border border-border bg-slate-900/60 p-3"
+                className="flex w-72 flex-shrink-0 flex-col gap-3 rounded-lg border border-border bg-[var(--column-bg)] p-3"
               >
                 <Skeleton className="h-4 w-32" />
                 <div className="space-y-2">
