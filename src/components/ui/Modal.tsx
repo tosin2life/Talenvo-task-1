@@ -83,7 +83,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
@@ -92,7 +92,7 @@ export function Modal({
     >
       <div
         ref={contentRef}
-        className={`max-h-[80vh] w-full max-w-xl overflow-y-auto rounded-xl border border-slate-200 bg-white p-6 text-slate-900 shadow-2xl${className ? ` ${className}` : ""}`}
+        className={`max-h-[80vh] w-full max-w-xl overflow-y-auto rounded-lg border border-border bg-card p-6 shadow-xl${className ? ` ${className}` : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

@@ -92,7 +92,7 @@ export function CommentThread({ cardId }: CommentThreadProps) {
           placeholder="Add a comment..."
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className="w-full min-h-[64px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="w-full min-h-[64px] rounded-md border border-border bg-[var(--input-bg)] px-3 py-2 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         />
         {error ? <p className="text-xs text-red-400">{error}</p> : null}
         <div className="flex justify-end">
@@ -194,7 +194,7 @@ function CommentItem({ comment, cardId, level }: CommentItemProps) {
 
   return (
     <article
-      className="space-y-1 rounded-md border border-slate-300 bg-white p-2 text-xs text-slate-900 shadow-sm"
+      className="space-y-1 rounded-md border border-border bg-[var(--input-bg)] p-2 text-xs shadow-sm"
       style={{ marginLeft: maxIndent > 0 ? maxIndent * 4 : 0 }}
     >
       <header className="flex items-center justify-between gap-2">
@@ -212,7 +212,7 @@ function CommentItem({ comment, cardId, level }: CommentItemProps) {
           </span>
         ) : isEditing ? (
           <textarea
-            className="mt-1 w-full rounded-md border border-slate-300 bg-white p-1 text-xs text-slate-900"
+            className="mt-1 w-full rounded-md border border-border bg-[var(--input-bg)] p-1 text-xs shadow-sm"
             value={editDraft}
             onChange={(e) => setEditDraft(e.target.value)}
           />
@@ -283,7 +283,7 @@ function CommentItem({ comment, cardId, level }: CommentItemProps) {
       {isReplying && !disabled && (
         <div className="mt-2 space-y-1">
           <textarea
-            className="w-full rounded-md border border-slate-300 bg-white p-1 text-xs text-slate-900"
+            className="w-full rounded-md border border-border bg-[var(--input-bg)] p-1 text-xs shadow-sm"
             rows={2}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
