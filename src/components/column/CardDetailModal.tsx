@@ -152,7 +152,7 @@ export function CardDetailModal({
             </label>
             <textarea
               id="card-description"
-              className="min-h-[140px] w-full rounded-md border border-border bg-[var(--input-bg)] p-3 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="min-h-[140px] w-full rounded-md border border-border bg-[var(--input-bg)] p-3 text-sm text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)] outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               value={state.description}
               onChange={(e) =>
                 setState((prev) => ({ ...prev, description: e.target.value }))
@@ -163,7 +163,7 @@ export function CardDetailModal({
             <p className="text-xs font-medium text-muted-foreground">
               Preview
             </p>
-            <div className="min-h-[140px] rounded-md border border-border bg-[var(--input-bg)] p-3 text-sm shadow-sm">
+            <div className="min-h-[140px] rounded-md border border-border bg-[var(--input-bg)] p-3 text-sm shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)]">
               <MarkdownRenderer value={state.description} />
             </div>
           </div>
@@ -264,7 +264,7 @@ export function CardDetailModal({
             <div className="mt-3 flex justify-end gap-2">
               <Button
                 type="button"
-                variant="ghost"
+                variant="cancel"
                 onClick={() => setDeleteConfirmOpen(false)}
               >
                 Cancel

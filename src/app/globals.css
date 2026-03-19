@@ -1,27 +1,6 @@
 @import "tailwindcss";
 
 :root,
-[data-theme="dark"] {
-  --background: #0b1120;
-  --foreground: #f9fafb;
-  --border: rgba(148, 163, 184, 0.45);
-  --card: #020617;
-  --muted-foreground: #9ca3af;
-  --nav-bg: #4338ca;
-  --nav-border: rgba(255, 255, 255, 0.1);
-  --column-bg: rgba(15, 23, 42, 0.6);
-  --kanban-card-bg: var(--card);
-  --column-delete-icon: #94a3b8;
-  --column-delete-hover-bg: rgba(15, 23, 42, 0.2);
-  --column-delete-hover-icon: #0f172a;
-  --input-bg: rgba(15, 23, 42, 0.6);
-  --due-date-bg: rgba(2, 6, 23, 0.9);
-  --due-date-color: #34d399;
-  --due-date-overdue-color: #f87171;
-  --add-card-section-bg: rgba(255, 255, 255, 0.06);
-  --add-card-section-bg-hover: rgba(255, 255, 255, 0.09);
-}
-
 [data-theme="light"] {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -43,22 +22,43 @@
   --add-card-section-bg-hover: #f3f4f6;
 }
 
+[data-theme="dark"] {
+  --background: #0b1120;
+  --foreground: #f9fafb;
+  --border: rgba(148, 163, 184, 0.45);
+  --card: #020617;
+  --muted-foreground: #9ca3af;
+  --nav-bg: #4338ca;
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --column-bg: rgba(15, 23, 42, 0.6);
+  --kanban-card-bg: var(--card);
+  --column-delete-icon: #94a3b8;
+  --column-delete-hover-bg: rgba(15, 23, 42, 0.2);
+  --column-delete-hover-icon: #0f172a;
+  --input-bg: rgba(15, 23, 42, 0.6);
+  --due-date-bg: rgba(2, 6, 23, 0.9);
+  --due-date-color: #34d399;
+  --due-date-overdue-color: #f87171;
+  --add-card-section-bg: rgba(255, 255, 255, 0.06);
+  --add-card-section-bg-hover: rgba(255, 255, 255, 0.09);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-border: var(--border);
   --color-card: var(--card);
   --color-muted-foreground: var(--muted-foreground);
-  --font-sans: var(--font-ovo);
+  --font-sans: var(--font-montserrat);
   --font-mono: var(--font-geist-mono);
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-[data-theme="light"] {
-  color-scheme: light;
+[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 @keyframes toast-slide-in {
@@ -95,7 +95,7 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family:
-    var(--font-ovo),
+    var(--font-montserrat),
     system-ui,
     -apple-system,
     BlinkMacSystemFont,

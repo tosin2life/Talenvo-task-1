@@ -111,7 +111,7 @@ export function CreateBoardModal({ open, onClose }: CreateBoardModalProps) {
           </label>
           <textarea
             id="board-description"
-            className="min-h-[80px] w-full rounded-md border border-border bg-slate-900/60 p-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="min-h-[80px] w-full rounded-md border border-border bg-[var(--input-bg)] p-3 text-sm text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)] outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             value={description}
             maxLength={300}
             onChange={(event) => setDescription(event.target.value)}
@@ -121,7 +121,7 @@ export function CreateBoardModal({ open, onClose }: CreateBoardModalProps) {
         <div className="flex justify-end gap-2 pt-2">
           <Button
             type="button"
-            variant="ghost"
+            variant="cancel"
             onClick={onClose}
           >
             Cancel

@@ -344,7 +344,7 @@ function DeleteColumnModal({
           </p>
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="ghost" onClick={onCancel}>
+          <Button type="button" variant="cancel" onClick={onCancel}>
             Cancel
           </Button>
           <Button

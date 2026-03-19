@@ -92,7 +92,7 @@ export function CommentThread({ cardId }: CommentThreadProps) {
           placeholder="Add a comment..."
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className="w-full min-h-[64px] rounded-md border border-border bg-[var(--input-bg)] px-3 py-2 text-sm text-foreground shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="w-full min-h-[64px] rounded-md border border-border bg-[var(--input-bg)] px-3 py-2 text-sm text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)] outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         />
         {error ? <p className="text-xs text-red-400">{error}</p> : null}
         <div className="flex justify-end">
@@ -212,7 +212,7 @@ function CommentItem({ comment, cardId, level }: CommentItemProps) {
           </span>
         ) : isEditing ? (
           <textarea
-            className="mt-1 w-full rounded-md border border-border bg-[var(--input-bg)] p-1 text-xs shadow-sm"
+            className="mt-1 w-full rounded-md border border-border bg-[var(--input-bg)] p-1 text-xs shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)]"
             value={editDraft}
             onChange={(e) => setEditDraft(e.target.value)}
           />
@@ -283,7 +283,7 @@ function CommentItem({ comment, cardId, level }: CommentItemProps) {
       {isReplying && !disabled && (
         <div className="mt-2 space-y-1">
           <textarea
-            className="w-full rounded-md border border-border bg-[var(--input-bg)] p-1 text-xs shadow-sm"
+            className="w-full rounded-md border border-border bg-[var(--input-bg)] p-1 text-xs shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)]"
             rows={2}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -295,7 +295,7 @@ function CommentItem({ comment, cardId, level }: CommentItemProps) {
             <Button
               type="button"
               size="sm"
-              variant="ghost"
+              variant="cancel"
               onClick={() => {
                 setIsReplying(false);
                 setDraft("");

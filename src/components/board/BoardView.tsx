@@ -187,7 +187,7 @@ export function BoardView({ boardId }: BoardViewProps) {
             <div className="flex justify-end gap-2">
               <Button
                 type="button"
-                variant="ghost"
+                variant="cancel"
                 size="sm"
                 onClick={() => {
                   setIsColumnFormOpen(false);
