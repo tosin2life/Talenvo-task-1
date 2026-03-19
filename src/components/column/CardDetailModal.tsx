@@ -152,7 +152,7 @@ export function CardDetailModal({
             </label>
             <textarea
               id="card-description"
-              className="min-h-[140px] w-full rounded-md border border-border bg-slate-900/60 p-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="min-h-[140px] w-full rounded-md border border-slate-300 bg-white p-3 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500"
               value={state.description}
               onChange={(e) =>
                 setState((prev) => ({ ...prev, description: e.target.value }))
@@ -163,7 +163,7 @@ export function CardDetailModal({
             <p className="text-xs font-medium text-muted-foreground">
               Preview
             </p>
-            <div className="min-h-[140px] rounded-md border border-border bg-slate-950/70 p-3 text-sm">
+            <div className="min-h-[140px] rounded-md border border-slate-300 bg-white p-3 text-sm text-slate-800 shadow-sm">
               <MarkdownRenderer value={state.description} />
             </div>
           </div>
@@ -223,7 +223,7 @@ export function CardDetailModal({
           <input
             id="card-due-date"
             type="date"
-            className="h-10 w-full rounded-md border border-border bg-slate-900/60 px-3 text-sm text-foreground outline-none focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500"
             value={dueDateValue}
             onChange={(e) =>
               setState((prev) => ({

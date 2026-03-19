@@ -92,7 +92,7 @@ export function CommentThread({ cardId }: CommentThreadProps) {
           placeholder="Add a comment..."
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          className="w-full min-h-[64px] rounded-md border border-border bg-slate-900/60 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          className="w-full min-h-[64px] rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-indigo-500"
         />
         {error ? <p className="text-xs text-red-400">{error}</p> : null}
         <div className="flex justify-end">
