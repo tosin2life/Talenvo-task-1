@@ -169,6 +169,7 @@ function ColumnInner({ column, cardIds, onOpenCardDetail }: ColumnProps) {
               onKeyDown={handleKeyDownTitle}
               className="h-8 flex-1 text-xs"
               aria-label="Column title"
+              placeholder="Column title"
             />
           ) : (
             <button

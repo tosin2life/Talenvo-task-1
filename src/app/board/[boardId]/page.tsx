@@ -5,12 +5,9 @@ interface BoardPageProps {
   params: Promise<{ boardId: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: BoardPageProps): Promise<Metadata> {
-  const { boardId } = await params;
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: `Board ${boardId} | Collaborative Knowledge Board`,
+    title: "Board | Collaborative Knowledge Board",
   };
 }
 

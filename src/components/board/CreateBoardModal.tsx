@@ -79,6 +79,7 @@ export function CreateBoardModal({ open, onClose }: CreateBoardModalProps) {
             id="board-title"
             value={title}
             maxLength={80}
+            placeholder="e.g. Project Alpha"
             onChange={(event) => {
               setTitle(event.target.value);
               if (error) setError(null);
@@ -111,6 +112,7 @@ export function CreateBoardModal({ open, onClose }: CreateBoardModalProps) {
           </label>
           <textarea
             id="board-description"
+            placeholder="Brief description of this board"
             className="min-h-[80px] w-full rounded-md border border-border bg-[var(--input-bg)] p-3 text-sm text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)] outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             value={description}
             maxLength={300}

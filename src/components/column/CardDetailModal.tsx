@@ -4,7 +4,6 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { MarkdownRenderer } from "@/lib/markdown";
 import { useCardForm } from "@/hooks/useCardForm";
 import { useCardStore } from "@/store/cardStore";
 import { useToastStore } from "@/store/toastStore";
@@ -128,6 +127,7 @@ export function CardDetailModal({
             id={titleId}
             value={state.title}
             maxLength={120}
+            placeholder="Card title"
             onChange={(e) => {
               setState((prev) => ({ ...prev, title: e.target.value }));
               if (titleError) setTitleError(null);
@@ -142,31 +142,22 @@ export function CardDetailModal({
           )}
         </header>
 
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <div className="space-y-2">
-            <label
-              className="block text-xs font-medium text-muted-foreground"
-              htmlFor="card-description"
-            >
-              Description (markdown)
-            </label>
-            <textarea
-              id="card-description"
-              className="min-h-[140px] w-full rounded-md border border-border bg-[var(--input-bg)] p-3 text-sm text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)] outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              value={state.description}
-              onChange={(e) =>
-                setState((prev) => ({ ...prev, description: e.target.value }))
-              }
-            />
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">
-              Preview
-            </p>
-            <div className="min-h-[140px] rounded-md border border-border bg-[var(--input-bg)] p-3 text-sm shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)]">
-              <MarkdownRenderer value={state.description} />
-            </div>
-          </div>
+        <div className="space-y-2">
+          <label
+            className="block text-xs font-medium text-muted-foreground"
+            htmlFor="card-description"
+          >
+            Description
+          </label>
+          <textarea
+            id="card-description"
+            placeholder="Add a description"
+            className="min-h-[140px] w-full rounded-md border border-border bg-[var(--input-bg)] p-3 text-sm text-foreground shadow-[0_1px_3px_0_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08)] outline-none placeholder:text-muted-foreground focus-visible:border-sky-500 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            value={state.description}
+            onChange={(e) =>
+              setState((prev) => ({ ...prev, description: e.target.value }))
+            }
+          />
         </div>
 
         <div className="space-y-2">

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useColumnStore } from "@/store/columnStore";
 import { CardDetailModal } from "@/components/column/CardDetailModal";
+import { Modal } from "@/components/ui/Modal";
 import { useCardStore } from "@/store/cardStore";
 import { useUndoStore } from "@/store/undoStore";
 import { useToastStore } from "@/store/toastStore";
@@ -38,13 +39,12 @@ export function BoardView({ boardId }: BoardViewProps) {
   }, [boardId, setActiveBoardId]);
 
   useEffect(() => {
-    const previousTitle = document.title;
     if (board?.title) {
-      document.title = `Board - ${board.title}`;
+      document.title = `Knowledge Board | ${board.title}`;
     }
 
     return () => {
-      document.title = previousTitle;
+      document.title = "Collaborative Knowledge Board";
     };
   }, [board?.title]);
 
@@ -160,50 +160,6 @@ export function BoardView({ boardId }: BoardViewProps) {
           </div>
         </header>
 
-        {isColumnFormOpen ? (
-          <form
-            onSubmit={handleCreateColumn}
-            className="ml-auto flex w-full max-w-sm flex-col gap-2 rounded-lg border border-border bg-slate-950/40 p-3"
-          >
-            <label
-              htmlFor="new-column-title"
-              className="text-xs font-medium text-muted-foreground"
-            >
-              Column name
-            </label>
-            <Input
-              id="new-column-title"
-              value={newColumnTitle}
-              onChange={(event) => {
-                setNewColumnTitle(event.target.value);
-                if (columnError) setColumnError(null);
-              }}
-              placeholder="Enter column name"
-              aria-invalid={Boolean(columnError)}
-            />
-            {columnError ? (
-              <p className="text-xs text-red-400">{columnError}</p>
-            ) : null}
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="cancel"
-                size="sm"
-                onClick={() => {
-                  setIsColumnFormOpen(false);
-                  setNewColumnTitle("");
-                  setColumnError(null);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" size="sm">
-                Create column
-              </Button>
-            </div>
-          </form>
-        ) : null}
-
         <section
           aria-label="Board columns"
           className="min-h-[60vh] rounded-lg border border-border bg-card p-4"
@@ -244,6 +200,63 @@ export function BoardView({ boardId }: BoardViewProps) {
           )}
         </section>
       </div>
+
+      <Modal
+        open={isColumnFormOpen}
+        onClose={() => {
+          setIsColumnFormOpen(false);
+          setNewColumnTitle("");
+          setColumnError(null);
+        }}
+        titleId="add-column-title"
+      >
+        <form
+          onSubmit={handleCreateColumn}
+          className="flex flex-col gap-4"
+        >
+          <h2 id="add-column-title" className="text-lg font-semibold tracking-tight">
+            Add column
+          </h2>
+          <div className="space-y-2">
+            <label
+              htmlFor="new-column-title"
+              className="block text-sm font-medium text-foreground"
+            >
+              Column name
+            </label>
+            <Input
+              id="new-column-title"
+              value={newColumnTitle}
+              onChange={(event) => {
+                setNewColumnTitle(event.target.value);
+                if (columnError) setColumnError(null);
+              }}
+              placeholder="Enter column name"
+              aria-invalid={Boolean(columnError)}
+            />
+            {columnError ? (
+              <p className="text-xs text-red-400">{columnError}</p>
+            ) : null}
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="cancel"
+              size="sm"
+              onClick={() => {
+                setIsColumnFormOpen(false);
+                setNewColumnTitle("");
+                setColumnError(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" size="sm">
+              Create column
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       <CardDetailModal
         open={cardModalOpen}
