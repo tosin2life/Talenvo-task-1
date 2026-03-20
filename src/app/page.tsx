@@ -40,7 +40,7 @@ export default function WorkspaceDashboardPage() {
         ) : (
           <section
             aria-labelledby="boards-empty-title"
-            className="flex-1 rounded-lg border border-dashed border-border bg-slate-950/60 p-8"
+            className="boards-empty-section flex-1 rounded-lg p-8"
           >
             <div className="flex flex-col items-center justify-center gap-4 text-center">
               <h2

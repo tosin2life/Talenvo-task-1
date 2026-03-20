@@ -91,6 +91,17 @@ html {
   animation: toast-slide-out 0.25s ease-in forwards;
 }
 
+.boards-empty-section {
+  background-color: #ffffff;
+  border: none;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.15), 0 2px 8px rgba(59, 130, 246, 0.12);
+}
+
+[data-theme="dark"] .boards-empty-section {
+  background-color: rgba(2, 6, 23, 0.6);
+  box-shadow: none;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
