@@ -1,19 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { BoardList } from "@/components/board/BoardList";
-import { CreateBoardModal } from "@/components/board/CreateBoardModal";
 import { useBoardStore } from "@/store/boardStore";
+import { useUIStore } from "@/store/uiStore";
 
 export default function WorkspaceDashboardPage() {
-  const [createOpen, setCreateOpen] = useState(false);
   const boardCount = useBoardStore((state) => state.boardIds.length);
   const hasBoards = boardCount > 0;
-
-  function openCreate() {
-    setCreateOpen(true);
-  }
+  const setOpenModal = useUIStore((state) => state.setOpenModal);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -27,11 +22,6 @@ export default function WorkspaceDashboardPage() {
             <p className="text-sm text-muted-foreground">
               Create and manage collaborative knowledge boards.
             </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button type="button" onClick={openCreate} aria-haspopup="dialog">
-              + New Board
-            </Button>
           </div>
         </header>
 
@@ -54,17 +44,16 @@ export default function WorkspaceDashboardPage() {
                 into one shared workspace. Start by creating a board for a
                 project, team, or topic.
               </p>
-              <Button type="button" onClick={openCreate}>
+              <Button
+                type="button"
+                onClick={() => setOpenModal("createBoard")}
+                aria-haspopup="dialog"
+              >
                 + New Board
               </Button>
             </div>
           </section>
         )}
-
-        <CreateBoardModal
-          open={createOpen}
-          onClose={() => setCreateOpen(false)}
-        />
       </div>
     </main>
   );

@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Lightbulb } from "lucide-react";
 import { Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 import { StoreHydration } from "@/components/StoreHydration";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ToastContainer } from "@/components/ui/Toast";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { NavBar } from "@/components/NavBar";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -40,16 +38,7 @@ export default function RootLayout({
             __html: `(function(){var t=localStorage.getItem('knowledge-board-theme');document.documentElement.setAttribute('data-theme',(t==='light'||t==='dark')?t:'light');})();`,
           }}
         />
-        <nav className="flex items-center justify-between gap-3 border-b border-white/10 bg-indigo-700 px-4 py-3">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-base font-bold tracking-tight text-white hover:text-blue-200 transition-colors"
-          >
-            <Lightbulb className="h-5 w-5" aria-hidden />
-            Idea Hub
-          </Link>
-          <ThemeToggle />
-        </nav>
+        <NavBar />
         <ErrorBoundary>
           <StoreHydration>{children}</StoreHydration>
           <ToastContainer />
