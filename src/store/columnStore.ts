@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Column } from "@/types";
 import { columnApi } from "@/api";
+import { publishRealtime } from "@/realtime/realtimeClient";
 
 type ColumnState = {
   columns: Record<string, Column>;
@@ -17,6 +18,9 @@ type ColumnActions = {
   ) => Promise<void>;
   deleteColumn: (id: string) => Promise<void>;
   removeColumnsByBoard: (boardId: string) => string[];
+  applyRemoteColumnCreated: (column: Column) => void;
+  applyRemoteColumnUpdated: (column: Column) => void;
+  applyRemoteColumnDeleted: (columnId: string) => void;
 };
 
 type ColumnStore = ColumnState & ColumnActions;
@@ -55,6 +59,7 @@ export const useColumnStore = create<ColumnStore>()(
       };
     });
 
+    publishRealtime({ type: "column:created", payload: { column } });
     return column;
   },
   updateColumn: async (id, changes) => {
@@ -63,6 +68,7 @@ export const useColumnStore = create<ColumnStore>()(
       if (!state.columns[id]) return state;
       return { columns: { ...state.columns, [id]: updated } };
     });
+    publishRealtime({ type: "column:updated", payload: { column: updated } });
   },
   deleteColumn: async (id) => {
     await columnApi.deleteColumn(id);
@@ -81,6 +87,7 @@ export const useColumnStore = create<ColumnStore>()(
         },
       };
     });
+    publishRealtime({ type: "column:deleted", payload: { columnId: id } });
   },
   removeColumnsByBoard: (boardId) => {
     let removedIds: string[] = [];
@@ -112,6 +119,37 @@ export const useColumnStore = create<ColumnStore>()(
 
     return removedIds;
   },
+  applyRemoteColumnCreated: (column) =>
+    set((state) => {
+      if (state.columns[column.id]) return state;
+      const existingIds = state.columnIds[column.boardId] ?? [];
+      return {
+        columns: { ...state.columns, [column.id]: column },
+        columnIds: {
+          ...state.columnIds,
+          [column.boardId]: [...existingIds, column.id],
+        },
+      };
+    }),
+  applyRemoteColumnUpdated: (column) =>
+    set((state) => {
+      if (!state.columns[column.id]) return state;
+      return { columns: { ...state.columns, [column.id]: column } };
+    }),
+  applyRemoteColumnDeleted: (columnId) =>
+    set((state) => {
+      const existing = state.columns[columnId];
+      if (!existing) return state;
+      const { [columnId]: _removed, ...restColumns } = state.columns;
+      const idsForBoard = state.columnIds[existing.boardId] ?? [];
+      return {
+        columns: restColumns,
+        columnIds: {
+          ...state.columnIds,
+          [existing.boardId]: idsForBoard.filter((id) => id !== columnId),
+        },
+      };
+    }),
 }),
     {
       name: "knowledge-board-columns",

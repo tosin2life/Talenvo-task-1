@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import type { Card } from "@/types";
+import type { Board, Card, Column, Comment } from "@/types";
+import { useBoardStore } from "@/store/boardStore";
 import { useCardStore } from "@/store/cardStore";
+import { useColumnStore } from "@/store/columnStore";
+import { useCommentStore } from "@/store/commentStore";
 
 type RealtimeEvent =
-  | {
-      type: "card:created";
-      payload: {
-        card: Card;
-      };
-    }
+  | { type: "comment:created"; payload: { comment: Comment } }
+  | { type: "comment:updated"; payload: { comment: Comment } }
+  | { type: "comment:deleted"; payload: { comment: Comment } }
+  | { type: "card:created"; payload: { card: Card } }
   | {
       type: "card:moved";
       payload: {
@@ -19,7 +20,15 @@ type RealtimeEvent =
         toColumnId: string;
         toIndex: number;
       };
-    };
+    }
+  | { type: "card:updated"; payload: { card: Card } }
+  | { type: "card:deleted"; payload: { cardId: string } }
+  | { type: "board:created"; payload: { board: Board } }
+  | { type: "board:updated"; payload: { board: Board } }
+  | { type: "board:deleted"; payload: { boardId: string } }
+  | { type: "column:created"; payload: { column: Column } }
+  | { type: "column:updated"; payload: { column: Column } }
+  | { type: "column:deleted"; payload: { columnId: string } };
 
 type RealtimeEnvelope = {
   clientId: string;
@@ -74,17 +83,63 @@ export function useRealtimeSubscription() {
       }
 
       const { event } = data;
-      if (event.type === "card:created") {
-        const { card } = event.payload;
-        useCardStore.getState().applyRemoteCardCreated(card);
-      } else if (event.type === "card:moved") {
-        const { cardId, fromColumnId, toColumnId, toIndex } = event.payload;
-        useCardStore.getState().applyRemoteCardMoved(
-          cardId,
-          fromColumnId,
-          toColumnId,
-          toIndex,
-        );
+      switch (event.type) {
+        case "comment:created":
+          useCommentStore
+            .getState()
+            .applyRemoteCommentCreated(event.payload.comment);
+          break;
+        case "comment:updated":
+          useCommentStore
+            .getState()
+            .applyRemoteCommentUpdated(event.payload.comment);
+          break;
+        case "comment:deleted":
+          useCommentStore
+            .getState()
+            .applyRemoteCommentDeleted(event.payload.comment);
+          break;
+        case "card:created":
+          useCardStore.getState().applyRemoteCardCreated(event.payload.card);
+          break;
+        case "card:moved":
+          useCardStore.getState().applyRemoteCardMoved(
+            event.payload.cardId,
+            event.payload.fromColumnId,
+            event.payload.toColumnId,
+            event.payload.toIndex,
+          );
+          break;
+        case "card:updated":
+          useCardStore.getState().applyRemoteCardUpdated(event.payload.card);
+          break;
+        case "card:deleted":
+          useCardStore.getState().applyRemoteCardDeleted(event.payload.cardId);
+          break;
+        case "board:created":
+          useBoardStore.getState().applyRemoteBoardCreated(event.payload.board);
+          break;
+        case "board:updated":
+          useBoardStore.getState().applyRemoteBoardUpdated(event.payload.board);
+          break;
+        case "board:deleted":
+          useBoardStore.getState().applyRemoteBoardDeleted(event.payload.boardId);
+          break;
+        case "column:created":
+          useColumnStore
+            .getState()
+            .applyRemoteColumnCreated(event.payload.column);
+          break;
+        case "column:updated":
+          useColumnStore
+            .getState()
+            .applyRemoteColumnUpdated(event.payload.column);
+          break;
+        case "column:deleted":
+          useColumnStore
+            .getState()
+            .applyRemoteColumnDeleted(event.payload.columnId);
+          break;
       }
     };
 

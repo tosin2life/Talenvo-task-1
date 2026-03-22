@@ -8,7 +8,7 @@ import {
   type MockApiOptions,
 } from "./mockStorage";
 
-const COMMENTS_KEY = "knowledge-board-comments";
+const COMMENTS_KEY = "knowledge-board-api-comments";
 
 type CommentsPersistedShape = {
   state?: {

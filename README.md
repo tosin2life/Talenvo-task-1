@@ -185,7 +185,28 @@ npm run start
 
 ---
 
-## 8. Deploy on Vercel
+## 8. Testing
+
+Unit and integration tests verify drag-and-drop logic, undo/redo, comment system, and board interactions.
+
+**Run all tests**
+```bash
+npm run test
+```
+
+**Run tests in watch mode (re-run on file changes)**
+```bash
+npm run test:watch
+```
+
+**Test coverage**
+- `src/__tests__/dragUndoLogic.unit.test.ts` – card move, undo/redo, remote sync tolerance
+- `src/__tests__/commentLogic.unit.test.ts` – comment add/edit/delete, threading
+- `src/__tests__/boardInteraction.integration.test.ts` – full flow: create board/column/cards, move card, undo/redo, comments persist with card
+
+---
+
+## 9. Deploy on Vercel
 
 1. Push the project to **GitHub** (or GitLab/Bitbucket).
 2. Go to [vercel.com](https://vercel.com) and sign in with the same Git provider.

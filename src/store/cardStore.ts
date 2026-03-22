@@ -32,6 +32,8 @@ type CardActions = {
     toColumnId: string,
     toIndex: number,
   ) => void;
+  applyRemoteCardUpdated: (card: Card) => void;
+  applyRemoteCardDeleted: (cardId: string) => void;
 };
 
 type CardStore = CardState & CardActions;
@@ -84,6 +86,7 @@ export const useCardStore = create<CardStore>()(
       if (!state.cards[id]) return state;
       return { cards: { ...state.cards, [id]: updated } };
     });
+    publishRealtime({ type: "card:updated", payload: { card: updated } });
   },
   deleteCard: async (id) => {
     const existing = useCardStore.getState().cards[id];
@@ -102,6 +105,7 @@ export const useCardStore = create<CardStore>()(
         },
       };
     });
+    publishRealtime({ type: "card:deleted", payload: { cardId: id } });
     useUndoStore.getState().pushDelete(existing);
   },
   moveCard: async (cardId, fromColumnId, toColumnId, toIndex) => {
@@ -246,6 +250,25 @@ export const useCardStore = create<CardStore>()(
       return {
         cards: { ...state.cards, [cardId]: updated },
         cardIds: nextCardIds,
+      };
+    }),
+  applyRemoteCardUpdated: (card) =>
+    set((state) => {
+      if (!state.cards[card.id]) return state;
+      return { cards: { ...state.cards, [card.id]: card } };
+    }),
+  applyRemoteCardDeleted: (cardId) =>
+    set((state) => {
+      const card = state.cards[cardId];
+      if (!card) return state;
+      const { [cardId]: _removed, ...restCards } = state.cards;
+      const idsForColumn = state.cardIds[card.columnId] ?? [];
+      return {
+        cards: restCards,
+        cardIds: {
+          ...state.cardIds,
+          [card.columnId]: idsForColumn.filter((id) => id !== cardId),
+        },
       };
     }),
 }),

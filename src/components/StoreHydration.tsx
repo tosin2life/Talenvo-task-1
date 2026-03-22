@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useBoardStore } from "@/store/boardStore";
 import { useColumnStore } from "@/store/columnStore";
 import { useCardStore } from "@/store/cardStore";
+import { useCommentStore } from "@/store/commentStore";
 import { useRealtimeSubscription } from "@/realtime/realtimeClient";
 import { Skeleton } from "@/components/ui/Skeleton";
 
@@ -47,6 +48,7 @@ export function StoreHydration({ children }: StoreHydrationProps) {
     useBoardStore.persist.rehydrate();
     useColumnStore.persist.rehydrate();
     useCardStore.persist.rehydrate();
+    useCommentStore.persist.rehydrate();
     const timeoutId = window.setTimeout(() => {
       setHydrated(true);
     }, 0);
